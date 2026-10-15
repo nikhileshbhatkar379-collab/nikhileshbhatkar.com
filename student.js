@@ -90,6 +90,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 10. Render Interactive Quiz
   renderStudentQuiz(user);
+
+  // 11. Render Weekly Timetable
+  renderStudentTimetable();
 });
 
 function renderStudentPapers(studentStandard) {
@@ -281,11 +284,25 @@ function closeStudentPaperModal() {
 }
 
 function downloadStudentPaper(paperId, title) {
-  openStudentPaperModal(paperId, 'download');
+  const allPapers = AcademyDB.getPapers() || [];
+  const paper = allPapers.find(p => p.id === paperId);
+  const decodedTitle = decodeURIComponent(title || (paper ? paper.title : 'Question Paper'));
+  if (paper && typeof window.downloadDocumentFile === 'function') {
+    window.downloadDocumentFile(paper, decodedTitle, 'paper');
+  } else {
+    openStudentPaperModal(paperId, 'download');
+  }
 }
 
 function viewStudentSolution(paperId, title) {
-  openStudentPaperModal(paperId, 'solution');
+  const allPapers = AcademyDB.getPapers() || [];
+  const paper = allPapers.find(p => p.id === paperId);
+  const decodedTitle = decodeURIComponent(title || (paper ? paper.title : 'Model Solution'));
+  if (paper && (paper.solutionData || (paper.solutionUrl && paper.solutionUrl !== '#')) && typeof window.downloadDocumentFile === 'function') {
+    window.downloadDocumentFile(paper, decodedTitle, 'solution');
+  } else {
+    openStudentPaperModal(paperId, 'solution');
+  }
 }
 
 function renderStudentNotes(studentStandard) {
@@ -369,8 +386,14 @@ function renderStudentNotices() {
 }
 
 function downloadStudentNote(noteId, title) {
-  const decodedTitle = decodeURIComponent(title);
-  alert(`📥 Downloading: "${decodedTitle}"\n\nFull study document is ready for offline study.`);
+  const allNotes = AcademyDB.getNotes() || [];
+  const note = allNotes.find(n => n.id === noteId);
+  const decodedTitle = decodeURIComponent(title || (note ? note.title : 'Study Document'));
+  if (note && typeof window.downloadDocumentFile === 'function') {
+    window.downloadDocumentFile(note, decodedTitle, 'note');
+  } else {
+    alert(`📥 Downloading: "${decodedTitle}"\n\nFull study document is ready for offline study.`);
+  }
 }
 
 function previewStudentNote(noteId) {
@@ -983,26 +1006,48 @@ function renderStudentQuiz(user) {
 
 
 // -------------------------------------------------------------
-// TIMETABLE RENDER
+// TIMETABLE RENDER (DUAL-VIEW RESPONSIVE)
 // -------------------------------------------------------------
 function renderStudentTimetable() {
   const timetable = AcademyDB.getTimetable() || [];
   const tbody = document.getElementById('studentTimetableBody');
-  if (!tbody) return;
+  const mobileContainer = document.getElementById('studentTimetableMobileCards');
 
-  if (timetable.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" class="text-center">No timetable entries available at this time.</td></tr>`;
-    return;
+  if (tbody) {
+    if (timetable.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center">No timetable entries available at this time.</td></tr>`;
+    } else {
+      tbody.innerHTML = timetable.map(t => `
+        <tr>
+          <td><span class="badge badge-standard"><strong>${t.standard}</strong></span></td>
+          <td><strong>${t.days}</strong></td>
+          <td><span style="font-weight:600;color:var(--primary);">${t.time}</span></td>
+          <td>${t.subjects}</td>
+          <td>👨‍🏫 ${t.faculty}</td>
+          <td><span class="badge badge-category">📍 ${t.room}</span></td>
+        </tr>
+      `).join('');
+    }
   }
 
-  tbody.innerHTML = timetable.map(t => `
-    <tr>
-      <td><strong>${t.standard}</strong></td>
-      <td>${t.days}</td>
-      <td><strong>${t.time}</strong></td>
-      <td>${t.subjects}</td>
-      <td>${t.faculty}</td>
-      <td><span class="badge badge-standard">${t.room}</span></td>
-    </tr>
-  `).join('');
+  if (mobileContainer) {
+    if (timetable.length === 0) {
+      mobileContainer.innerHTML = `<div class="timetable-empty-card" style="text-align:center;padding:24px;background:#f8fafc;border-radius:10px;border:1px dashed #cbd5e1;grid-column:1/-1;">No timetable entries available at this time.</div>`;
+    } else {
+      mobileContainer.innerHTML = timetable.map(t => `
+        <div class="timetable-card">
+          <div class="timetable-card-top">
+            <span class="badge badge-standard">${t.standard}</span>
+            <span class="badge badge-category">📍 ${t.room}</span>
+          </div>
+          <div class="timetable-card-body">
+            <div class="timetable-card-time">⏰ ${t.time}</div>
+            <div class="timetable-card-days">🗓️ <strong>Days:</strong> ${t.days}</div>
+            <div class="timetable-card-row">📚 <strong>Subjects:</strong> ${t.subjects}</div>
+            <div class="timetable-card-row">👨‍🏫 <strong>Faculty:</strong> ${t.faculty}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
 }

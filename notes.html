@@ -378,8 +378,14 @@
 
     // Helper functions for Note downloads & previews
     function downloadSampleNote(noteId, title) {
-      const decodedTitle = decodeURIComponent(title);
-      alert(`📥 Downloading Study Note: "${decodedTitle}"\n\nNikhillesh Bhatkar Learning Academy study material is ready for download.`);
+      const allNotes = AcademyDB.getNotes() || [];
+      const note = allNotes.find(n => n.id === noteId);
+      const decodedTitle = decodeURIComponent(title || (note ? note.title : 'Study Document'));
+      if (note && typeof window.downloadDocumentFile === 'function') {
+        window.downloadDocumentFile(note, decodedTitle, 'note');
+      } else {
+        alert(`📥 Downloading Study Note: "${decodedTitle}"\n\nNikhillesh Bhatkar Learning Academy study material is ready for download.`);
+      }
     }
 
     function previewNoteContent(noteId) {
@@ -518,11 +524,25 @@
 
     // Helper functions for Board Paper downloads & solutions
     function downloadSamplePaper(paperId, title) {
-      openPaperModal(paperId, 'download');
+      const allPapers = AcademyDB.getPapers() || [];
+      const paper = allPapers.find(p => p.id === paperId);
+      const decodedTitle = decodeURIComponent(title || (paper ? paper.title : 'Question Paper'));
+      if (paper && typeof window.downloadDocumentFile === 'function') {
+        window.downloadDocumentFile(paper, decodedTitle, 'paper');
+      } else {
+        openPaperModal(paperId, 'download');
+      }
     }
 
     function viewPaperSolution(paperId, title) {
-      openPaperModal(paperId, 'solution');
+      const allPapers = AcademyDB.getPapers() || [];
+      const paper = allPapers.find(p => p.id === paperId);
+      const decodedTitle = decodeURIComponent(title || (paper ? paper.title : 'Model Solution'));
+      if (paper && (paper.solutionData || (paper.solutionUrl && paper.solutionUrl !== '#')) && typeof window.downloadDocumentFile === 'function') {
+        window.downloadDocumentFile(paper, decodedTitle, 'solution');
+      } else {
+        openPaperModal(paperId, 'solution');
+      }
     }
 
     function previewPaperOverview(paperId) {

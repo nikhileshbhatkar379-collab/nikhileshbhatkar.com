@@ -128,6 +128,7 @@ function renderOverviewStats() {
   const papers = AcademyDB.getPapers() || [];
   const notices = AcademyDB.getNotices();
   const inquiries = AcademyDB.getInquiries();
+  const timetable = AcademyDB.getTimetable() || [];
 
   const totalStuEl = document.getElementById('statTotalStudents');
   if (totalStuEl) totalStuEl.textContent = students.length;
@@ -137,6 +138,9 @@ function renderOverviewStats() {
 
   const paperStatEl = document.getElementById('statTotalPapers');
   if (paperStatEl) paperStatEl.textContent = papers.length;
+
+  const statBatchesEl = document.getElementById('statTotalBatches');
+  if (statBatchesEl) statBatchesEl.textContent = timetable.length;
 
   const totalNoticesEl = document.getElementById('statTotalNotices');
   if (totalNoticesEl) totalNoticesEl.textContent = notices.length;
@@ -285,6 +289,27 @@ window.deleteStudent = function(studentId) {
   }
 };
 
+// Document upload state variables
+let uploadedNoteFileData = null;
+let uploadedNoteFileName = '';
+let uploadedNoteFileType = 'PDF';
+
+let uploadedPaperFileData = null;
+let uploadedPaperFileName = '';
+let uploadedPaperFileType = 'PDF';
+
+let uploadedSolutionFileData = null;
+let uploadedSolutionFileName = '';
+
+// Helper to format file sizes
+function formatByteSize(bytes) {
+  if (!bytes || bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
 // -------------------------------------------------------------
 // 3. NOTES MANAGEMENT
 // -------------------------------------------------------------
@@ -313,15 +338,16 @@ function renderNotesTable() {
 
   tbody.innerHTML = filtered.map(n => `
     <tr>
-      <td><strong>${n.title}</strong><br><small>${n.description.substring(0, 75)}...</small></td>
+      <td><strong>${n.title}</strong><br><small>${(n.description || '').substring(0, 75)}...</small></td>
       <td><span class="badge badge-standard">${n.standard}</span></td>
       <td>${n.subject}</td>
       <td>${n.chapter}</td>
-      <td><code>${n.size || '2.0 MB'}</code></td>
+      <td><span class="badge badge-category">📄 ${n.fileType || 'PDF'}</span> <code style="font-size:0.8rem;margin-left:4px;">${n.size || '2.0 MB'}</code></td>
       <td>${n.date || '—'}</td>
       <td>
         <div class="action-buttons">
-          <button class="btn-sm btn-edit" onclick="previewNoteContent('${n.id}')" title="Preview Note">👁️</button>
+          <button class="btn-sm btn-download" onclick="downloadAdminNote('${n.id}')" title="Download Document">⬇️ Download</button>
+          <button class="btn-sm btn-edit" onclick="previewNoteContent('${n.id}')" title="Preview Note Details">👁️</button>
           <button class="btn-sm btn-delete" onclick="deleteNote('${n.id}')" title="Delete Note">🗑️</button>
         </div>
       </td>
@@ -329,8 +355,24 @@ function renderNotesTable() {
   `).join('');
 }
 
+window.downloadAdminNote = function(noteId) {
+  const notes = AcademyDB.getNotes();
+  const note = notes.find(n => n.id === noteId);
+  if (note && typeof window.downloadDocumentFile === 'function') {
+    window.downloadDocumentFile(note, note.title, 'note');
+  }
+};
+
 window.openAddNoteModal = function() {
-  document.getElementById('noteModalForm').reset();
+  const form = document.getElementById('noteModalForm');
+  if (form) form.reset();
+  uploadedNoteFileData = null;
+  uploadedNoteFileName = '';
+  uploadedNoteFileType = 'PDF';
+  const preview = document.getElementById('noteFileSelectedPreview');
+  if (preview) preview.style.display = 'none';
+  const fileInput = document.getElementById('modalNoteFile');
+  if (fileInput) fileInput.value = '';
   document.getElementById('noteModal').style.display = 'flex';
 };
 
@@ -352,7 +394,7 @@ window.previewNoteContent = function(noteId) {
   const notes = AcademyDB.getNotes();
   const note = notes.find(n => n.id === noteId);
   if (note) {
-    alert(`📖 Study Note Details:\n\nTitle: ${note.title}\nStandard: ${note.standard}\nSubject: ${note.subject}\nChapter: ${note.chapter}\nSize: ${note.size}\n\nSummary:\n${note.description}`);
+    alert(`📖 Study Note Details:\n\nTitle: ${note.title}\nStandard: ${note.standard}\nSubject: ${note.subject}\nChapter: ${note.chapter}\nSize: ${note.size}\nFormat: ${note.fileType || 'PDF'}\n\nSummary:\n${note.description}`);
   }
 };
 
@@ -398,9 +440,14 @@ function renderPapersTable() {
         <td><strong>${p.year || 'Board Paper'}</strong></td>
         <td><span class="paper-type-pill ${typeBadge}">📝 ${p.type}</span></td>
         <td>${p.marks || '40 Marks'}</td>
-        <td><span class="badge ${p.solutionAvailable ? 'badge-paid' : 'badge-regular'}">${p.solutionAvailable ? '✅ Available' : '⏳ Pending'}</span></td>
+        <td>
+          <span class="badge badge-category">📄 ${p.fileType || 'PDF'}</span><br>
+          <span class="badge ${p.solutionAvailable ? 'badge-paid' : 'badge-regular'}" style="margin-top:4px;display:inline-block;">${p.solutionAvailable ? '🔑 Key Attached' : '⏳ Solution Pending'}</span>
+        </td>
         <td>
           <div class="action-buttons">
+            <button class="btn-sm btn-download" onclick="downloadAdminPaper('${p.id}')" title="Download Question Paper">⬇️ Paper</button>
+            ${p.solutionAvailable ? `<button class="btn-sm btn-solution" onclick="downloadAdminSolution('${p.id}')" title="Download Answer Key">🔑 Key</button>` : ''}
             <button class="btn-sm btn-edit" onclick="previewPaperDetails('${p.id}')" title="Preview Details">👁️</button>
             <button class="btn-sm btn-delete" onclick="deletePaper('${p.id}')" title="Delete Paper">🗑️</button>
           </div>
@@ -410,8 +457,38 @@ function renderPapersTable() {
   }).join('');
 }
 
+window.downloadAdminPaper = function(paperId) {
+  const papers = AcademyDB.getPapers() || [];
+  const paper = papers.find(p => p.id === paperId);
+  if (paper && typeof window.downloadDocumentFile === 'function') {
+    window.downloadDocumentFile(paper, paper.title, 'paper');
+  }
+};
+
+window.downloadAdminSolution = function(paperId) {
+  const papers = AcademyDB.getPapers() || [];
+  const paper = papers.find(p => p.id === paperId);
+  if (paper && typeof window.downloadDocumentFile === 'function') {
+    window.downloadDocumentFile(paper, paper.title, 'solution');
+  }
+};
+
 window.openAddPaperModal = function() {
-  document.getElementById('paperModalForm').reset();
+  const form = document.getElementById('paperModalForm');
+  if (form) form.reset();
+  uploadedPaperFileData = null;
+  uploadedPaperFileName = '';
+  uploadedPaperFileType = 'PDF';
+  uploadedSolutionFileData = null;
+  uploadedSolutionFileName = '';
+  const paperPreview = document.getElementById('paperFileSelectedPreview');
+  if (paperPreview) paperPreview.style.display = 'none';
+  const solPreview = document.getElementById('paperSolutionSelectedPreview');
+  if (solPreview) solPreview.style.display = 'none';
+  const paperFile = document.getElementById('modalPaperFile');
+  if (paperFile) paperFile.value = '';
+  const solFile = document.getElementById('modalPaperSolutionFile');
+  if (solFile) solFile.value = '';
   document.getElementById('paperModal').style.display = 'flex';
 };
 
@@ -433,7 +510,7 @@ window.previewPaperDetails = function(paperId) {
   const papers = AcademyDB.getPapers() || [];
   const paper = papers.find(p => p.id === paperId);
   if (paper) {
-    alert(`📝 Board Question Paper Overview:\n\nTitle: ${paper.title}\nStandard: ${paper.standard}\nSubject: ${paper.subject}\nYear/Session: ${paper.year}\nCategory: ${paper.type}\nMarks: ${paper.marks}\nDuration: ${paper.duration}\nSolution Included: ${paper.solutionAvailable ? 'Yes' : 'No'}\n\nDescription:\n${paper.description}`);
+    alert(`📝 Board Question Paper Overview:\n\nTitle: ${paper.title}\nStandard: ${paper.standard}\nSubject: ${paper.subject}\nYear/Session: ${paper.year}\nCategory: ${paper.type}\nMarks: ${paper.marks}\nDuration: ${paper.duration}\nFormat: ${paper.fileType || 'PDF'}\nSolution Included: ${paper.solutionAvailable ? 'Yes' : 'No'}\n\nDescription:\n${paper.description}`);
   }
 };
 
@@ -958,42 +1035,82 @@ window.printReceipt = function(receiptNo) {
 };
 
 // -------------------------------------------------------------
-// 11. TIMETABLE MANAGER
+// 11. TIMETABLE MANAGER (RESPONSIVE DUAL-VIEW)
 // -------------------------------------------------------------
 function renderTimetableManager() {
   const timetable = AcademyDB.getTimetable() || [];
+  const standardFilter = document.getElementById('timetableStandardFilter')?.value || 'all';
   const tbody = document.getElementById('timetableTableBody');
-  if (!tbody) return;
+  const mobileCardsContainer = document.getElementById('timetableMobileCards');
 
-  if (timetable.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center">No timetable entries found.</td></tr>`;
-    return;
+  // Filter timetable entries while retaining their original storage index
+  const filtered = timetable
+    .map((t, originalIndex) => ({ ...t, originalIndex }))
+    .filter(t => {
+      if (standardFilter === 'all') return true;
+      return t.standard && (t.standard.includes(standardFilter) || t.standard.toLowerCase().includes(standardFilter.toLowerCase()));
+    });
+
+  // Desktop Table Render
+  if (tbody) {
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center">No batch schedules found matching filter.</td></tr>`;
+    } else {
+      tbody.innerHTML = filtered.map(t => `
+        <tr>
+          <td><span class="badge badge-standard"><strong>${t.standard}</strong></span></td>
+          <td><strong>${t.days}</strong></td>
+          <td><span style="font-weight:600;color:var(--primary);">${t.time}</span></td>
+          <td>${t.subjects}</td>
+          <td>👨‍🏫 ${t.faculty}</td>
+          <td><span class="badge badge-category">📍 ${t.room}</span></td>
+          <td class="text-right table-actions">
+            <button class="btn-sm btn-edit" title="Edit Schedule Entry" onclick="editTimetable(${t.originalIndex})">✏️ Edit</button>
+            <button class="btn-sm btn-delete" title="Delete Schedule Entry" onclick="deleteTimetable(${t.originalIndex})">🗑️ Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
   }
 
-  tbody.innerHTML = timetable.map((t, index) => `
-    <tr>
-      <td><strong>${t.standard}</strong></td>
-      <td>${t.days}</td>
-      <td><strong>${t.time}</strong></td>
-      <td>${t.subjects}</td>
-      <td>${t.faculty}</td>
-      <td><span class="badge badge-standard">${t.room}</span></td>
-      <td class="text-right table-actions">
-        <button class="btn-icon text-blue" title="Edit Entry" onclick="editTimetable(${index})">✏️</button>
-        <button class="btn-icon text-red" title="Delete Entry" onclick="deleteTimetable(${index})">🗑️</button>
-      </td>
-    </tr>
-  `).join('');
+  // Mobile Adaptive Card Grid Render
+  if (mobileCardsContainer) {
+    if (filtered.length === 0) {
+      mobileCardsContainer.innerHTML = `<div class="timetable-empty-card" style="text-align:center;padding:24px;background:#f8fafc;border-radius:10px;border:1px dashed #cbd5e1;grid-column:1/-1;">No batch schedules found matching filter.</div>`;
+    } else {
+      mobileCardsContainer.innerHTML = filtered.map(t => `
+        <div class="timetable-card">
+          <div class="timetable-card-top">
+            <span class="badge badge-standard">${t.standard}</span>
+            <span class="badge badge-category">📍 ${t.room}</span>
+          </div>
+          <div class="timetable-card-body">
+            <div class="timetable-card-time">⏰ ${t.time}</div>
+            <div class="timetable-card-days">🗓️ <strong>Days:</strong> ${t.days}</div>
+            <div class="timetable-card-row">📚 <strong>Subjects:</strong> ${t.subjects}</div>
+            <div class="timetable-card-row">👨‍🏫 <strong>Faculty:</strong> ${t.faculty}</div>
+          </div>
+          <div class="timetable-card-actions">
+            <button class="btn-sm btn-edit" onclick="editTimetable(${t.originalIndex})" title="Edit Batch">✏️ Edit</button>
+            <button class="btn-sm btn-delete" onclick="deleteTimetable(${t.originalIndex})" title="Delete Batch">🗑️ Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
 }
 
-// Open Timetable Modal
+// Timetable Modal Management
 const timetableModal = document.getElementById('timetableModal');
 const timetableForm = document.getElementById('timetableForm');
 
 window.openTimetableModal = (index = -1) => {
   const timetable = AcademyDB.getTimetable() || [];
-  document.getElementById('timetableModalTitle').textContent = index >= 0 ? "Edit Timetable Entry" : "Add Timetable Entry";
-  
+  const titleEl = document.getElementById('timetableModalTitle');
+  if (titleEl) {
+    titleEl.textContent = index >= 0 ? "✏️ Edit Timetable Entry" : "🗓️ Add New Timetable Entry";
+  }
+
   if (index >= 0 && timetable[index]) {
     const t = timetable[index];
     document.getElementById('modalTimetableIndex').value = index;
@@ -1005,9 +1122,13 @@ window.openTimetableModal = (index = -1) => {
     document.getElementById('modalTtFaculty').value = t.faculty;
   } else {
     document.getElementById('modalTimetableIndex').value = '';
-    timetableForm.reset();
+    if (timetableForm) timetableForm.reset();
   }
-  timetableModal.style.display = 'flex';
+  if (timetableModal) timetableModal.style.display = 'flex';
+};
+
+window.closeTimetableModal = () => {
+  if (timetableModal) timetableModal.style.display = 'none';
 };
 
 window.editTimetable = (index) => {
@@ -1015,11 +1136,12 @@ window.editTimetable = (index) => {
 };
 
 window.deleteTimetable = (index) => {
-  if(confirm("Are you sure you want to delete this timetable entry?")) {
+  if (confirm("Are you sure you want to delete this timetable batch entry?")) {
     const timetable = AcademyDB.getTimetable() || [];
     timetable.splice(index, 1);
     AcademyDB.saveTimetable(timetable);
     renderTimetableManager();
+    renderOverviewStats();
   }
 };
 
@@ -1177,6 +1299,354 @@ window.sendBulkWhatsAppAlert = function(type) {
 };
 
 // -------------------------------------------------------------
+// 14. TIMETABLE EDITABLE INTERFACE
+// -------------------------------------------------------------
+window.showEditableTimetableInterface = function() {
+  const timetableTableBody = document.getElementById('timetableTableBody');
+  const timetableMobileCards = document.getElementById('timetableMobileCards');
+
+  if (!timetableTableBody && !timetableMobileCards) return;
+
+  // Add CSS class to make table rows/cards editable
+  if (timetableTableBody) {
+    timetableTableBody.classList.add('editable-mode');
+
+    // Replace action buttons with save/cancel for each row
+    const rows = timetableTableBody.querySelectorAll('tr');
+    rows.forEach(row => {
+      const actionsCell = row.querySelector('.text-right.table-actions');
+      if (actionsCell) {
+        const index = row.querySelectorAll('td').length > 6 ?
+          Array.from(row.querySelectorAll('td')[6].children)
+            .findIndex(el => el.textContent.trim() === '✏️ Edit' || el.textContent.trim() === '🗑️ Delete') : -1;
+
+        if (index >= 0) {
+          // Save original row data for potential cancel
+          const rowData = {
+            standard: row.querySelector('td:nth-child(1) .badge-standard')?.textContent.trim() || '',
+            days: row.querySelector('td:nth-child(2) strong')?.textContent.trim() || '',
+            time: row.querySelector('td:nth-child(3) span')?.textContent.trim() || '',
+            subjects: row.querySelector('td:nth-child(4)')?.textContent.trim() || '',
+            faculty: row.querySelector('td:nth-child(5)')?.textContent.replace('👨‍🏫 ', '').trim() || '',
+            room: row.querySelector('td:nth-child(6) .badge-category')?.textContent.replace('📍 ', '').trim() || ''
+          };
+
+          actionsCell.innerHTML = `
+            <button class="btn-sm btn-save" onclick="saveTimetableRow(this, ${Array.from(timetableTableBody.rows).indexOf(row)})" title="Save changes">💾 Save</button>
+            <button class="btn-sm btn-cancel" onclick="cancelEditTimetableRow(this, ${Array.from(timetableTableBody.rows).indexOf(row)})" title="Cancel editing">✖️ Cancel</button>
+          `;
+
+          // Store original data on the row for cancel functionality
+          row.dataset.originalData = JSON.stringify(rowData);
+
+          // Make fields editable
+          const standardEl = row.querySelector('td:nth-child(1) .badge-standard');
+          const daysEl = row.querySelector('td:nth-child(2) strong');
+          const timeEl = row.querySelector('td:nth-child(3) span');
+          const subjectsEl = row.querySelector('td:nth-child(4)');
+          const facultyEl = row.querySelector('td:nth-child(5)');
+          const roomEl = row.querySelector('td:nth-child(6) .badge-category');
+
+          if (standardEl) standardEl.contentEditable = 'true';
+          if (daysEl) daysEl.contentEditable = 'true';
+          if (timeEl) timeEl.contentEditable = 'true';
+          if (subjectsEl) subjectsEl.contentEditable = 'true';
+          if (facultyEl) facultyEl.contentEditable = 'true';
+          if (roomEl) roomEl.contentEditable = 'true';
+
+          // Add visual indicators
+          [standardEl, daysEl, timeEl, subjectsEl, facultyEl, roomEl].forEach(el => {
+            if (el) {
+              el.style.backgroundColor = '#fff3cd';
+              el.style.padding = '2px 4px';
+              el.style.borderRadius = '3px';
+              el.style.border = '1px solid #ffeaa7';
+            }
+          });
+        }
+      }
+    });
+  }
+
+  // Handle mobile cards similarly
+  if (timetableMobileCards) {
+    timetableMobileCards.classList.add('editable-mode');
+    const cards = timetableMobileCards.querySelectorAll('.timetable-card');
+    cards.forEach((card, index) => {
+      const actionsDiv = card.querySelector('.timetable-card-actions');
+      if (actionsDiv) {
+        // Save original data
+        const standardEl = card.querySelector('.timetable-card-top .badge-standard');
+        const roomEl = card.querySelector('.timetable-card-top .badge-category');
+        const timeEl = card.querySelector('.timetable-card-time');
+        const daysEl = card.querySelector('.timetable-card-days strong');
+        const subjectsEl = card.querySelector('.timetable-card-row:contains("Subjects:")');
+        const facultyEl = card.querySelector('.timetable-card-row:contains("Faculty:")');
+
+        const rowData = {
+          standard: standardEl ? standardEl.textContent.trim() : '',
+          room: roomEl ? roomEl.textContent.replace('📍 ', '').trim() : '',
+          time: timeEl ? timeEl.textContent.replace('⏰ ', '').trim() : '',
+          days: daysEl ? daysEl.textContent.replace('🗓️ ', '').replace('<strong>', '').replace('</strong>', '').trim() : '',
+          subjects: subjectsEl ? subjectsEl.textContent.replace('📚 ', '').replace('<strong>', '').replace('</strong>', '').trim() : '',
+          faculty: facultyEl ? facultyEl.textContent.replace('👨‍🏫 ', '').replace('<strong>', '').replace('</strong>', '').trim() : ''
+        };
+
+        card.dataset.originalData = JSON.stringify(rowData);
+
+        actionsDiv.innerHTML = `
+          <button class="btn-sm btn-save" onclick="saveTimetableCard(this, ${index})" title="Save changes">💾 Save</button>
+          <button class="btn-sm btn-cancel" onclick="cancelEditTimetableCard(this, ${index})" title="Cancel editing">✖️ Cancel</button>
+        `;
+
+        // Make fields editable
+        [standardEl, roomEl, timeEl, daysEl, subjectsEl, facultyEl].forEach(el => {
+          if (el) {
+            el.contentEditable = 'true';
+            el.style.backgroundColor = '#fff3cd';
+            el.style.padding = '2px 4px';
+            el.style.borderRadius = '3px';
+            el.style.border = '1px solid #ffeaa7';
+          }
+        });
+      }
+    });
+  }
+
+  // Update button states
+  const editBtn = document.getElementById('editTimetableBtn');
+  if (editBtn) {
+    editBtn.textContent = '👁️ View Mode';
+    editBtn.onclick = function() {
+      exitEditableTimetableMode();
+    };
+    editBtn.title = 'Exit edit mode and return to view-only timetable';
+  }
+};
+
+function saveTimetableRow(button, rowIndex) {
+  const row = button.closest('tr');
+  if (!row) return;
+
+  const standardEl = row.querySelector('td:nth-child(1) .badge-standard');
+  const daysEl = row.querySelector('td:nth-child(2) strong');
+  const timeEl = row.querySelector('td:nth-child(3) span');
+  const subjectsEl = row.querySelector('td:nth-child(4)');
+  const facultyEl = row.querySelector('td:nth-child(5)');
+  const roomEl = row.querySelector('td:nth-child(6) .badge-category');
+
+  const updatedEntry = {
+    standard: standardEl ? standardEl.textContent.trim() : '',
+    days: daysEl ? daysEl.textContent.trim() : '',
+    time: timeEl ? timeEl.textContent.trim() : '',
+    subjects: subjectsEl ? subjectsEl.textContent.trim() : '',
+    faculty: facultyEl ? facultyEl.textContent.trim() : '',
+    room: roomEl ? roomEl.textContent.trim() : ''
+  };
+
+  // Validate required fields
+  if (!updatedEntry.standard || !updatedEntry.days || !updatedEntry.time || !updatedEntry.subjects || !updatedEntry.faculty || !updatedEntry.room) {
+    alert('Please fill in all fields before saving.');
+    return;
+  }
+
+  const timetable = AcademyDB.getTimetable() || [];
+  if (timetable[rowIndex]) {
+    timetable[rowIndex] = updatedEntry;
+    AcademyDB.saveTimetable(timetable);
+
+    // Reset UI
+    resetTimetableEditMode();
+    renderTimetableManager();
+    renderOverviewStats();
+
+    alert('✅ Timetable entry updated successfully!');
+  }
+}
+
+function cancelEditTimetableRow(button, rowIndex) {
+  const row = button.closest('tr');
+  if (!row) return;
+
+  const originalData = JSON.parse(row.dataset.originalData || '{}');
+
+  // Restore original values
+  const standardEl = row.querySelector('td:nth-child(1) .badge-standard');
+  const daysEl = row.querySelector('td:nth-child(2) strong');
+  const timeEl = row.querySelector('td:nth-child(3) span');
+  const subjectsEl = row.querySelector('td:nth-child(4)');
+  const facultyEl = row.querySelector('td:nth-child(5)');
+  const roomEl = row.querySelector('td:nth-child(6) .badge-category');
+
+  if (standardEl) standardEl.textContent = originalData.standard || '';
+  if (daysEl) daysEl.textContent = originalData.days || '';
+  if (timeEl) timeEl.textContent = originalData.time || '';
+  if (subjectsEl) subjectsEl.textContent = originalData.subjects || '';
+  if (facultyEl) facultyEl.textContent = originalData.faculty || '';
+  if (roomEl) roomEl.textContent = originalData.room || '';
+
+  // Reset UI
+  resetTimetableEditMode();
+  renderTimetableManager();
+}
+
+function saveTimetableCard(button, cardIndex) {
+  const card = button.closest('.timetable-card');
+  if (!card) return;
+
+  const standardEl = card.querySelector('.timetable-card-top .badge-standard');
+  const roomEl = card.querySelector('.timetable-card-top .badge-category');
+  const timeEl = card.querySelector('.timetable-card-time');
+  const daysEl = card.querySelector('.timetable-card-days strong');
+  const subjectsEl = card.querySelector('.timetable-card-row:contains("Subjects:")');
+  const facultyEl = card.querySelector('.timetable-card-row:contains("Faculty:")');
+
+  const updatedEntry = {
+    standard: standardEl ? standardEl.textContent.trim() : '',
+    room: roomEl ? roomEl.textContent.replace('📍 ', '').trim() : '',
+    time: timeEl ? timeEl.textContent.replace('⏰ ', '').trim() : '',
+    days: daysEl ? daysEl.textContent.replace('🗓️ ', '').replace('<strong>', '').replace('</strong>', '').trim() : '',
+    subjects: subjectsEl ? subjectsEl.textContent.replace('📚 ', '').replace('<strong>', '').replace('</strong>', '').trim() : '',
+    faculty: facultyEl ? facultyEl.textContent.replace('👨‍🏫 ', '').replace('<strong>', '').replace('</strong>', '').trim() : ''
+  };
+
+  // Validate required fields
+  if (!updatedEntry.standard || !updatedEntry.room || !updatedEntry.time || !updatedEntry.days || !updatedEntry.subjects || !updatedEntry.faculty) {
+    alert('Please fill in all fields before saving.');
+    return;
+  }
+
+  const timetable = AcademyDB.getTimetable() || [];
+  if (timetable[cardIndex]) {
+    timetable[cardIndex] = updatedEntry;
+    AcademyDB.saveTimetable(timetable);
+
+    // Reset UI
+    resetTimetableEditMode();
+    renderTimetableManager();
+    renderOverviewStats();
+
+    alert('✅ Timetable entry updated successfully!');
+  }
+}
+
+function cancelEditTimetableCard(button, cardIndex) {
+  const card = button.closest('.timetable-card');
+  if (!card) return;
+
+  const originalData = JSON.parse(card.dataset.originalData || '{}');
+
+  // Restore original values
+  const standardEl = card.querySelector('.timetable-card-top .badge-standard');
+  const roomEl = card.querySelector('.timetable-card-top .badge-category');
+  const timeEl = card.querySelector('.timetable-card-time');
+  const daysEl = card.querySelector('.timetable-card-days strong');
+  const subjectsEl = card.querySelector('.timetable-card-row:contains("Subjects:")');
+  const facultyEl = card.querySelector('.timetable-card-row:contains("Faculty:")');
+
+  if (standardEl) standardEl.textContent = originalData.standard || '';
+  if (roomEl) roomEl.textContent = '📍 ' + (originalData.room || '');
+  if (timeEl) timeEl.textContent = '⏰ ' + (originalData.time || '');
+  if (daysEl) daysEl.textContent = '🗓️ <strong>' + (originalData.days || '') + '</strong>';
+  if (subjectsEl) subjectsEl.textContent = '📚 <strong>' + (originalData.subjects || '') + '</strong>';
+  if (facultyEl) facultyEl.textContent = '👨‍🏫 <strong>' + (originalData.faculty || '') + '</strong>';
+
+  // Reset UI
+  resetTimetableEditMode();
+  renderTimetableManager();
+}
+
+function resetTimetableEditMode() {
+  // Reset table
+  const timetableTableBody = document.getElementById('timetableTableBody');
+  if (timetableTableBody) {
+    timetableTableBody.classList.remove('editable-mode');
+    const rows = timetableTableBody.querySelectorAll('tr');
+    rows.forEach(row => {
+      // Reset contentEditable and styling
+      const standardEl = row.querySelector('td:nth-child(1) .badge-standard');
+      const daysEl = row.querySelector('td:nth-child(2) strong');
+      const timeEl = row.querySelector('td:nth-child(3) span');
+      const subjectsEl = row.querySelector('td:nth-child(4)');
+      const facultyEl = row.querySelector('td:nth-child(5)');
+      const roomEl = row.querySelector('td:nth-child(6) .badge-category');
+
+      [standardEl, daysEl, timeEl, subjectsEl, facultyEl, roomEl].forEach(el => {
+        if (el) {
+          el.contentEditable = 'false';
+          el.style.backgroundColor = '';
+          el.style.padding = '';
+          el.style.borderRadius = '';
+          el.style.border = '';
+        }
+      });
+
+      // Restore action buttons
+      const actionsCell = row.querySelector('.text-right.table-actions');
+      if (actionsCell) {
+        actionsCell.innerHTML = `
+          <button class="btn-sm btn-edit" title="Edit Schedule Entry" onclick="editTimetable(${Array.from(timetableTableBody.rows).indexOf(row)})">✏️ Edit</button>
+          <button class="btn-sm btn-delete" title="Delete Schedule Entry" onclick="deleteTimetable(${Array.from(timetableTableBody.rows).indexOf(row)})">🗑️ Delete</button>
+        `;
+      }
+
+      // Remove stored data
+      delete row.dataset.originalData;
+    });
+  }
+
+  // Reset mobile cards
+  const timetableMobileCards = document.getElementById('timetableMobileCards');
+  if (timetableMobileCards) {
+    timetableMobileCards.classList.remove('editable-mode');
+    const cards = timetableMobileCards.querySelectorAll('.timetable-card');
+    cards.forEach((card, index) => {
+      // Reset contentEditable and styling
+      const standardEl = card.querySelector('.timetable-card-top .badge-standard');
+      const roomEl = card.querySelector('.timetable-card-top .badge-category');
+      const timeEl = card.querySelector('.timetable-card-time');
+      const daysEl = card.querySelector('.timetable-card-days strong');
+      const subjectsEl = card.querySelector('.timetable-card-row:contains("Subjects:")');
+      const facultyEl = card.querySelector('.timetable-card-row:contains("Faculty:")');
+
+      [standardEl, roomEl, timeEl, daysEl, subjectsEl, facultyEl].forEach(el => {
+        if (el) {
+          el.contentEditable = 'false';
+          el.style.backgroundColor = '';
+          el.style.padding = '';
+          el.style.borderRadius = '';
+          el.style.border = '';
+        }
+      });
+
+      // Restore action buttons
+      const actionsDiv = card.querySelector('.timetable-card-actions');
+      if (actionsDiv) {
+        actionsDiv.innerHTML = `
+          <button class="btn-sm btn-edit" onclick="editTimetable(${index})" title="Edit Batch">✏️ Edit</button>
+          <button class="btn-sm btn-delete" onclick="deleteTimetable(${index})" title="Delete Batch">🗑️ Delete</button>
+        `;
+      }
+
+      // Remove stored data
+      delete card.dataset.originalData;
+    });
+  }
+
+  // Reset button
+  const editBtn = document.getElementById('editTimetableBtn');
+  if (editBtn) {
+    editBtn.textContent = '✏️ Edit Existing Entries';
+    editBtn.onclick = showEditableTimetableInterface;
+    editBtn.title = 'Make existing timetable entries editable';
+  }
+}
+
+function exitEditableTimetableMode() {
+  resetTimetableEditMode();
+}
+
+// -------------------------------------------------------------
 // 14. EVENT LISTENERS & FORM HANDLERS
 // -------------------------------------------------------------
 function setupEventListeners() {
@@ -1188,6 +1658,13 @@ function setupEventListeners() {
   document.getElementById('openAddReceiptBtn')?.addEventListener('click', openAddReceiptModal);
   document.getElementById('openAddTopperBtn')?.addEventListener('click', openAddTopperModal);
   document.getElementById('markTodayAttendanceBtn')?.addEventListener('click', openAttendanceModal);
+  document.getElementById('openAddTimetableBtn')?.addEventListener('click', () => openTimetableModal(-1));
+
+  // Quick Action: Add Timetable Entry from Overview
+  document.getElementById('quickAddTimetableBtn')?.addEventListener('click', () => {
+    switchAdminTab('tab-timetable');
+    openTimetableModal(-1);
+  });
 
   // Filters
   document.getElementById('studentSearchInput')?.addEventListener('input', renderStudentsTable);
@@ -1201,9 +1678,266 @@ function setupEventListeners() {
   document.getElementById('paperStandardFilter')?.addEventListener('change', renderPapersTable);
   document.getElementById('paperTypeFilter')?.addEventListener('change', renderPapersTable);
 
+  document.getElementById('timetableStandardFilter')?.addEventListener('change', renderTimetableManager);
+
   document.getElementById('testSearchInput')?.addEventListener('input', renderTestsTable);
   document.getElementById('testStandardFilter')?.addEventListener('change', renderTestsTable);
   document.getElementById('doubtStatusFilter')?.addEventListener('change', renderDoubtsManager);
+
+  // -----------------------------------------------------------
+  // DOCUMENT UPLOAD EVENT HANDLERS: NOTES
+  // -----------------------------------------------------------
+  const noteFileInput = document.getElementById('modalNoteFile');
+  const noteDropzone = document.getElementById('noteFileDropzone');
+  const noteFilePreview = document.getElementById('noteFileSelectedPreview');
+  const removeNoteFileBtn = document.getElementById('removeNoteFileBtn');
+
+  function handleNoteFileSelection(file) {
+    if (!file) return;
+    uploadedNoteFileName = file.name;
+    const ext = file.name.split('.').pop().toUpperCase();
+    uploadedNoteFileType = ext || 'PDF';
+    const formattedSize = formatByteSize(file.size);
+
+    // Auto-fill title if currently blank
+    const titleInput = document.getElementById('modalNoteTitle');
+    if (titleInput && !titleInput.value.trim()) {
+      const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
+      titleInput.value = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      uploadedNoteFileData = e.target.result;
+    };
+    reader.readAsDataURL(file);
+
+    if (noteFilePreview) {
+      const nameEl = document.getElementById('noteSelectedFileName');
+      const sizeEl = document.getElementById('noteSelectedFileSize');
+      if (nameEl) nameEl.textContent = file.name;
+      if (sizeEl) sizeEl.textContent = formattedSize;
+      noteFilePreview.style.display = 'flex';
+    }
+  }
+
+  if (noteFileInput) {
+    noteFileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleNoteFileSelection(e.target.files[0]);
+      }
+    });
+  }
+
+  if (noteDropzone) {
+    // Click on the dropzone area opens the file picker
+    noteDropzone.addEventListener('click', (e) => {
+      if (e.target === noteDropzone || e.target.closest('.dropzone-icon') || e.target.closest('.dropzone-text') || e.target.closest('.dropzone-hint')) {
+        noteFileInput?.click();
+      }
+    });
+    ['dragenter', 'dragover'].forEach(eventName => {
+      noteDropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        noteDropzone.classList.add('drag-over');
+      });
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+      noteDropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        noteDropzone.classList.remove('drag-over');
+      });
+    });
+    noteDropzone.addEventListener('drop', (e) => {
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleNoteFileSelection(e.dataTransfer.files[0]);
+      }
+    });
+    noteDropzone.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        noteFileInput?.click();
+      }
+    });
+  }
+
+  if (removeNoteFileBtn) {
+    removeNoteFileBtn.addEventListener('click', () => {
+      uploadedNoteFileData = null;
+      uploadedNoteFileName = '';
+      uploadedNoteFileType = 'PDF';
+      if (noteFileInput) noteFileInput.value = '';
+      if (noteFilePreview) noteFilePreview.style.display = 'none';
+    });
+  }
+
+  // -----------------------------------------------------------
+  // DOCUMENT UPLOAD EVENT HANDLERS: PAPERS & SOLUTIONS
+  // -----------------------------------------------------------
+  // Question Paper File
+  const paperFileInput = document.getElementById('modalPaperFile');
+  const paperDropzone = document.getElementById('paperFileDropzone');
+  const paperFilePreview = document.getElementById('paperFileSelectedPreview');
+  const removePaperFileBtn = document.getElementById('removePaperFileBtn');
+
+  function handlePaperFileSelection(file) {
+    if (!file) return;
+    uploadedPaperFileName = file.name;
+    const ext = file.name.split('.').pop().toUpperCase();
+    uploadedPaperFileType = ext || 'PDF';
+    const formattedSize = formatByteSize(file.size);
+
+    const titleInput = document.getElementById('modalPaperTitle');
+    if (titleInput && !titleInput.value.trim()) {
+      const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
+      titleInput.value = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      uploadedPaperFileData = e.target.result;
+    };
+    reader.readAsDataURL(file);
+
+    if (paperFilePreview) {
+      const nameEl = document.getElementById('paperSelectedFileName');
+      const sizeEl = document.getElementById('paperSelectedFileSize');
+      if (nameEl) nameEl.textContent = file.name;
+      if (sizeEl) sizeEl.textContent = formattedSize;
+      paperFilePreview.style.display = 'flex';
+    }
+  }
+
+  if (paperFileInput) {
+    paperFileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handlePaperFileSelection(e.target.files[0]);
+      }
+    });
+  }
+
+  if (paperDropzone) {
+    // Click on the dropzone area opens the file picker
+    paperDropzone.addEventListener('click', (e) => {
+      if (e.target === paperDropzone || e.target.closest('.dropzone-icon') || e.target.closest('.dropzone-text') || e.target.closest('.dropzone-hint')) {
+        paperFileInput?.click();
+      }
+    });
+    ['dragenter', 'dragover'].forEach(eventName => {
+      paperDropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        paperDropzone.classList.add('drag-over');
+      });
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+      paperDropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        paperDropzone.classList.remove('drag-over');
+      });
+    });
+    paperDropzone.addEventListener('drop', (e) => {
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handlePaperFileSelection(e.dataTransfer.files[0]);
+      }
+    });
+    paperDropzone.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        paperFileInput?.click();
+      }
+    });
+  }
+
+  if (removePaperFileBtn) {
+    removePaperFileBtn.addEventListener('click', () => {
+      uploadedPaperFileData = null;
+      uploadedPaperFileName = '';
+      uploadedPaperFileType = 'PDF';
+      if (paperFileInput) paperFileInput.value = '';
+      if (paperFilePreview) paperFilePreview.style.display = 'none';
+    });
+  }
+
+  // Model Solution / Answer Key File
+  const solutionFileInput = document.getElementById('modalPaperSolutionFile');
+  const solutionDropzone = document.getElementById('paperSolutionDropzone');
+  const solutionFilePreview = document.getElementById('paperSolutionSelectedPreview');
+  const removePaperSolutionBtn = document.getElementById('removePaperSolutionBtn');
+
+  function handleSolutionFileSelection(file) {
+    if (!file) return;
+    uploadedSolutionFileName = file.name;
+    const formattedSize = formatByteSize(file.size);
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      uploadedSolutionFileData = e.target.result;
+    };
+    reader.readAsDataURL(file);
+
+    if (solutionFilePreview) {
+      const nameEl = document.getElementById('paperSolutionSelectedName');
+      const sizeEl = document.getElementById('paperSolutionSelectedSize');
+      if (nameEl) nameEl.textContent = file.name;
+      if (sizeEl) sizeEl.textContent = formattedSize;
+      solutionFilePreview.style.display = 'flex';
+    }
+  }
+
+  if (solutionFileInput) {
+    solutionFileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleSolutionFileSelection(e.target.files[0]);
+      }
+    });
+  }
+
+  if (solutionDropzone) {
+    // Click on the dropzone area opens the file picker
+    solutionDropzone.addEventListener('click', (e) => {
+      if (e.target === solutionDropzone || e.target.closest('.dropzone-icon') || e.target.closest('.dropzone-text') || e.target.closest('.dropzone-hint')) {
+        solutionFileInput?.click();
+      }
+    });
+    ['dragenter', 'dragover'].forEach(eventName => {
+      solutionDropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        solutionDropzone.classList.add('drag-over');
+      });
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+      solutionDropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        solutionDropzone.classList.remove('drag-over');
+      });
+    });
+    solutionDropzone.addEventListener('drop', (e) => {
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleSolutionFileSelection(e.dataTransfer.files[0]);
+      }
+    });
+    solutionDropzone.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        solutionFileInput?.click();
+      }
+    });
+  }
+
+  if (removePaperSolutionBtn) {
+    removePaperSolutionBtn.addEventListener('click', () => {
+      uploadedSolutionFileData = null;
+      uploadedSolutionFileName = '';
+      if (solutionFileInput) solutionFileInput.value = '';
+      if (solutionFilePreview) solutionFilePreview.style.display = 'none';
+    });
+  }
 
   // Student Form Submission
   const studentForm = document.getElementById('studentModalForm');
@@ -1258,17 +1992,22 @@ function setupEventListeners() {
       e.preventDefault();
       const notes = AcademyDB.getNotes();
       const newId = 'NOTE-' + (100 + notes.length + 1);
+      const title = document.getElementById('modalNoteTitle').value.trim();
+      const externalUrl = document.getElementById('modalNoteUrl')?.value.trim() || '';
+      const formattedSize = uploadedNoteFileName ? (document.getElementById('noteSelectedFileSize')?.textContent || '2.0 MB') : '2.0 MB';
 
       notes.push({
         id: newId,
-        title: document.getElementById('modalNoteTitle').value.trim(),
+        title: title,
         standard: document.getElementById('modalNoteStandard').value,
         subject: document.getElementById('modalNoteSubject').value.trim(),
         chapter: document.getElementById('modalNoteChapter').value.trim(),
-        fileType: 'PDF',
-        size: document.getElementById('modalNoteSize').value.trim() || '2.0 MB',
+        fileType: uploadedNoteFileType || 'PDF',
+        size: formattedSize,
         date: new Date().toISOString().split('T')[0],
-        downloadUrl: '#',
+        fileName: uploadedNoteFileName || `${title.replace(/[^a-zA-Z0-9_-]/g, '_')}.${(uploadedNoteFileType || 'pdf').toLowerCase()}`,
+        fileData: uploadedNoteFileData || null,
+        downloadUrl: externalUrl || '#',
         description: document.getElementById('modalNoteDesc').value.trim()
       });
 
@@ -1276,7 +2015,7 @@ function setupEventListeners() {
       closeNoteModal();
       renderNotesTable();
       renderOverviewStats();
-      alert('✅ Study note uploaded & published successfully!');
+      alert('✅ Study note document uploaded & published successfully!');
     });
   }
 
@@ -1287,22 +2026,33 @@ function setupEventListeners() {
       e.preventDefault();
       const papers = AcademyDB.getPapers() || [];
       const newId = 'PAPER-' + (100 + papers.length + 1);
+      const title = document.getElementById('modalPaperTitle').value.trim();
+      const externalUrl = document.getElementById('modalPaperUrl')?.value.trim() || '';
+      const solutionUrl = document.getElementById('modalPaperSolutionUrl')?.value.trim() || '';
+      const hasSolution = !!uploadedSolutionFileData || !!solutionUrl;
+      const formattedPaperSize = uploadedPaperFileName ? (document.getElementById('paperSelectedFileSize')?.textContent || '2.5 MB') : '2.5 MB';
+      const formattedSolSize = uploadedSolutionFileName ? (document.getElementById('paperSolutionSelectedSize')?.textContent || '3.0 MB') : '3.0 MB';
 
       papers.push({
         id: newId,
-        title: document.getElementById('modalPaperTitle').value.trim(),
+        title: title,
         standard: document.getElementById('modalPaperStandard').value,
         subject: document.getElementById('modalPaperSubject').value.trim(),
         year: document.getElementById('modalPaperYear').value.trim(),
         type: document.getElementById('modalPaperType').value,
         marks: document.getElementById('modalPaperMarks').value.trim() || '40 Marks',
         duration: document.getElementById('modalPaperDuration').value.trim() || '2 Hours',
-        fileType: 'PDF',
-        size: '2.5 MB',
+        fileType: uploadedPaperFileType || 'PDF',
+        size: formattedPaperSize,
         date: new Date().toISOString().split('T')[0],
-        solutionAvailable: true,
-        solutionSize: '3.0 MB',
-        downloadUrl: '#',
+        fileName: uploadedPaperFileName || `${title.replace(/[^a-zA-Z0-9_-]/g, '_')}.${(uploadedPaperFileType || 'pdf').toLowerCase()}`,
+        fileData: uploadedPaperFileData || null,
+        solutionAvailable: hasSolution,
+        solutionFileName: uploadedSolutionFileName || (hasSolution ? `${title.replace(/[^a-zA-Z0-9_-]/g, '_')}_Solution.pdf` : ''),
+        solutionData: uploadedSolutionFileData || null,
+        solutionSize: formattedSolSize,
+        downloadUrl: externalUrl || '#',
+        solutionUrl: solutionUrl || '#',
         description: document.getElementById('modalPaperDesc').value.trim()
       });
 
@@ -1310,7 +2060,7 @@ function setupEventListeners() {
       closePaperModal();
       renderPapersTable();
       renderOverviewStats();
-      alert('✅ Board Question Paper uploaded & published successfully!');
+      alert('✅ Board Question Paper & Model Solution uploaded successfully!');
     });
   }
 
@@ -1477,6 +2227,68 @@ function setupEventListeners() {
       }
     });
   }
+
+  // Timetable Form Submission
+  if (timetableForm) {
+    timetableForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const index = document.getElementById('modalTimetableIndex').value;
+      const timetable = AcademyDB.getTimetable() || [];
+
+      const entry = {
+        standard: document.getElementById('modalTtStandard').value,
+        days: document.getElementById('modalTtDays').value,
+        time: document.getElementById('modalTtTime').value,
+        subjects: document.getElementById('modalTtSubjects').value.trim(),
+        faculty: document.getElementById('modalTtFaculty').value.trim(),
+        room: document.getElementById('modalTtRoom').value.trim()
+      };
+
+      if (index !== '') {
+        // Edit existing entry
+        timetable[index] = entry;
+      } else {
+        // Add new entry
+        timetable.push(entry);
+      }
+
+      AcademyDB.saveTimetable(timetable);
+      document.getElementById('timetableModal').style.display = 'none';
+      timetableForm.reset();
+      renderTimetableManager();
+      renderOverviewStats();
+      alert('✅ Timetable schedule entry saved successfully!');
+    });
+  }
+
+  // Backdrop click dismissal for all modals
+  const modalOverlays = [
+    'studentModal', 'noteModal', 'paperModal', 'timetableModal',
+    'testModal', 'receiptModal', 'topperModal', 'attendanceModal',
+    'doubtReplyModal', 'printReceiptModal'
+  ];
+  modalOverlays.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('click', (e) => {
+        if (e.target === el) {
+          el.style.display = 'none';
+        }
+      });
+    }
+  });
+
+  // Escape key dismissal for all modals
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      modalOverlays.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.style.display === 'flex') {
+          el.style.display = 'none';
+        }
+      });
+    }
+  });
 
   // Save Attendance Button
   document.getElementById('saveAttendanceBtn')?.addEventListener('click', () => {

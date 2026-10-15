@@ -68,6 +68,7 @@
             <button class="btn-primary" id="quickAddStudentBtn">+ Add Student</button>
             <button class="btn-primary" id="quickAddNoteBtn">+ Upload Note</button>
             <button class="btn-primary" id="quickAddPaperBtn">+ Upload Paper</button>
+            <button class="btn-primary" id="quickAddTimetableBtn" onclick="window.switchAdminTab('tab-timetable'); openTimetableModal(-1);">+ Add Timetable Entry</button>
             <button class="btn-primary" id="quickAddNoticeBtn">+ Post Notice</button>
           </div>
         </div>
@@ -81,18 +82,25 @@
               <h3 id="statTotalStudents">5</h3>
             </div>
           </div>
-          <div class="metric-card">
+          <div class="metric-card" onclick="window.switchAdminTab('tab-notes')" style="cursor:pointer;" title="View Notes">
             <div class="metric-icon">📚</div>
             <div class="metric-info">
               <span class="metric-label">Study Notes &amp; Formulas</span>
               <h3 id="statTotalNotes">9</h3>
             </div>
           </div>
-          <div class="metric-card">
+          <div class="metric-card" onclick="window.switchAdminTab('tab-papers')" style="cursor:pointer;" title="View Papers">
             <div class="metric-icon">📝</div>
             <div class="metric-info">
               <span class="metric-label">Board Papers &amp; PYQs</span>
               <h3 id="statTotalPapers">14</h3>
+            </div>
+          </div>
+          <div class="metric-card" onclick="window.switchAdminTab('tab-timetable')" style="cursor:pointer;" title="View Timetable">
+            <div class="metric-icon">🗓️</div>
+            <div class="metric-info">
+              <span class="metric-label">Scheduled Batches</span>
+              <h3 id="statTotalBatches">10</h3>
             </div>
           </div>
           <div class="metric-card">
@@ -195,8 +203,11 @@
       <!-- ================= 3. NOTES TAB ================= -->
       <section id="tab-notes" class="admin-tab-content">
         <div class="section-title-row">
-          <h2>📚 Study Notes &amp; Learning Materials Repository</h2>
-          <button class="btn-primary" id="openAddNoteModalBtn">+ Upload / Add New Note</button>
+          <div>
+            <h2>📚 Study Notes &amp; Learning Materials Repository</h2>
+            <p class="section-subtitle">Upload PDFs, chapter notes, formula sheets, and study materials for students</p>
+          </div>
+          <button class="btn-primary" id="openAddNoteModalBtn" onclick="openAddNoteModal()">📤 Upload / Add New Note</button>
         </div>
 
         <!-- Notes Filter -->
@@ -222,7 +233,7 @@
                 <th>Standard</th>
                 <th>Subject</th>
                 <th>Chapter</th>
-                <th>File Size</th>
+                <th>Document File</th>
                 <th>Date Added</th>
                 <th>Actions</th>
               </tr>
@@ -235,8 +246,11 @@
       <!-- ================= 3B. BOARD QUESTION PAPERS TAB ================= -->
       <section id="tab-papers" class="admin-tab-content">
         <div class="section-title-row">
-          <h2>📝 Maharashtra Board Question Papers &amp; Solutions</h2>
-          <button class="btn-primary" id="openAddPaperModalBtn">+ Upload New Question Paper</button>
+          <div>
+            <h2>📝 Maharashtra Board Question Papers &amp; Solutions</h2>
+            <p class="section-subtitle">Upload past board question papers, prelim models, and answer keys</p>
+          </div>
+          <button class="btn-primary" id="openAddPaperModalBtn" onclick="openAddPaperModal()">📤 Upload New Question Paper</button>
         </div>
 
         <!-- Papers Filter -->
@@ -269,7 +283,7 @@
                 <th>Year / Session</th>
                 <th>Type</th>
                 <th>Marks</th>
-                <th>Solution Key</th>
+                <th>Document &amp; Key</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -517,11 +531,38 @@
 
       <!-- ================= 11. TIMETABLE MANAGER ================= -->
       <section id="tab-timetable" class="admin-tab-content">
-        <div class="section-title-row">
-          <h2>🗓️ Batch Timetable &amp; Lecture Schedule</h2>
-          <button class="btn-primary" id="openAddTimetableBtn">+ Add Timetable Entry</button>
+        <div class="section-title-row timetable-title-row">
+          <div>
+            <h2>🗓️ Batch Timetable &amp; Lecture Schedule</h2>
+            <p class="section-subtitle">Manage class timings, faculty allocations, and classrooms for all standards</p>
+          </div>
+          <div class="action-btn-group timetable-action-btns">
+            <button class="btn-primary btn-timetable-add" id="openAddTimetableBtn" onclick="openTimetableModal(-1)">
+              ➕ Add Timetable Entry
+            </button>
+            <button class="btn-secondary btn-timetable-edit" id="editTimetableBtn" onclick="showEditableTimetableInterface()" title="Make existing timetable entries editable">
+              ✏️ Edit Existing Entries
+            </button>
+          </div>
         </div>
-        <div class="table-responsive">
+
+        <!-- Filter bar for timetable -->
+        <div class="table-filter-bar">
+          <select id="timetableStandardFilter" onchange="renderTimetableManager()">
+            <option value="all">All Standards &amp; Courses</option>
+            <option value="Standard 8">Standard 8</option>
+            <option value="Standard 9">Standard 9</option>
+            <option value="Standard 10 (SSC)">Standard 10 (SSC)</option>
+            <option value="Standard 11 (Science)">Standard 11 (Science)</option>
+            <option value="Standard 11 (Commerce)">Standard 11 (Commerce)</option>
+            <option value="Standard 12 (Science)">Standard 12 (Science)</option>
+            <option value="Standard 12 (Commerce)">Standard 12 (Commerce)</option>
+            <option value="Special">Special Courses (Stock / AI / Finance)</option>
+          </select>
+        </div>
+
+        <!-- Desktop Table View -->
+        <div class="table-responsive timetable-desktop-view">
           <table class="data-table timetable-table">
             <thead>
               <tr>
@@ -537,6 +578,9 @@
             <tbody id="timetableTableBody"></tbody>
           </table>
         </div>
+
+        <!-- Mobile Responsive Cards View (< 768px) -->
+        <div id="timetableMobileCards" class="timetable-mobile-cards"></div>
       </section>
 
       <!-- ================= 12. HALL OF FAME ================= -->
@@ -653,46 +697,77 @@
   </div>
 
   <!-- Add / Edit Note Modal -->
-  <div id="noteModal" class="modal-overlay" style="display:none;">
+  <div id="noteModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeNoteModal()">
     <div class="modal-card">
       <div class="modal-header">
         <h3 id="noteModalTitle">Upload / Add Study Note</h3>
         <button class="modal-close" onclick="closeNoteModal()">&times;</button>
       </div>
       <form id="noteModalForm" class="modal-form">
+        <!-- Document Upload Section -->
+        <div class="form-group document-upload-group">
+          <label for="modalNoteFile">📂 Select &amp; Upload Document File (PDF, Word, Image) <span class="required">*</span></label>
+          <div class="file-dropzone" id="noteFileDropzone" tabindex="0" role="button" aria-label="Choose document file from your computer">
+            <div class="dropzone-icon">📁</div>
+            <div class="dropzone-text"><strong>Click here or drag &amp; drop</strong> to select a document file</div>
+            <div class="dropzone-hint">Supports PDF, DOCX, DOC, PPTX, JPG, PNG, TXT (up to 25 MB)</div>
+            <button type="button" class="btn-browse-file btn-primary" onclick="document.getElementById('modalNoteFile').click()">➕ Add File from Computer</button>
+            <input type="file" id="modalNoteFile" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.txt" style="display:none;">
+          </div>
+          <div id="noteFileSelectedPreview" class="file-selected-preview" style="display:none;">
+            <span class="file-icon">📎</span>
+            <div class="file-info">
+              <strong id="noteSelectedFileName">notes.pdf</strong>
+              <span id="noteSelectedFileSize" class="file-size-badge">2.4 MB</span>
+            </div>
+            <button type="button" class="btn-remove-file" id="removeNoteFileBtn" title="Remove selected file">&times;</button>
+          </div>
+          <div class="form-group" style="margin-top:0.75rem;">
+            <label for="modalNoteUrl">Or External Link / Google Drive URL (Optional)</label>
+            <input type="url" id="modalNoteUrl" placeholder="https://drive.google.com/... or https://...">
+          </div>
+        </div>
+
         <div class="form-group">
           <label for="modalNoteTitle">Note / Document Title <span class="required">*</span></label>
           <input type="text" id="modalNoteTitle" placeholder="e.g. Class 10 Gravitation & Space Missions Complete Notes" required>
         </div>
-        <div class="form-group">
-          <label for="modalNoteStandard">Standard / Class <span class="required">*</span></label>
-          <select id="modalNoteStandard" required>
-            <option value="Standard 8">Standard 8</option>
-            <option value="Standard 9">Standard 9</option>
-            <option value="Standard 10 (SSC)">Standard 10 (SSC)</option>
-            <option value="Standard 12 (HSC)">Standard 12 (HSC)</option>
-            <option value="Special: Stock Market">Special: Stock Market</option>
-            <option value="Special: AI & Generative AI">Special: AI &amp; Generative AI</option>
-          </select>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="modalNoteStandard">Standard / Class <span class="required">*</span></label>
+            <select id="modalNoteStandard" required>
+              <option value="Standard 8">Standard 8</option>
+              <option value="Standard 9">Standard 9</option>
+              <option value="Standard 10 (SSC)">Standard 10 (SSC)</option>
+              <option value="Standard 11 (Science)">Standard 11 (Science)</option>
+              <option value="Standard 11 (Commerce)">Standard 11 (Commerce)</option>
+              <option value="Standard 12 (Science)">Standard 12 (Science)</option>
+              <option value="Standard 12 (Commerce)">Standard 12 (Commerce)</option>
+              <option value="Special: Stock Market">Special: Stock Market</option>
+              <option value="Special: AI & Generative AI">Special: AI &amp; Generative AI</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="modalNoteSize">File Size</label>
+            <input type="text" id="modalNoteSize" placeholder="e.g. 2.5 MB" value="2.0 MB">
+          </div>
         </div>
-        <div class="form-group">
-          <label for="modalNoteSubject">Subject <span class="required">*</span></label>
-          <input type="text" id="modalNoteSubject" placeholder="e.g. Science & Technology Part 1" required>
-        </div>
-        <div class="form-group">
-          <label for="modalNoteChapter">Chapter / Module <span class="required">*</span></label>
-          <input type="text" id="modalNoteChapter" placeholder="e.g. Chapter 1 & 10" required>
-        </div>
-        <div class="form-group">
-          <label for="modalNoteSize">File Size</label>
-          <input type="text" id="modalNoteSize" placeholder="e.g. 2.5 MB" value="2.0 MB">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="modalNoteSubject">Subject <span class="required">*</span></label>
+            <input type="text" id="modalNoteSubject" placeholder="e.g. Science & Technology Part 1" required>
+          </div>
+          <div class="form-group">
+            <label for="modalNoteChapter">Chapter / Module <span class="required">*</span></label>
+            <input type="text" id="modalNoteChapter" placeholder="e.g. Chapter 1 & 10" required>
+          </div>
         </div>
         <div class="form-group">
           <label for="modalNoteDesc">Short Overview / Description <span class="required">*</span></label>
           <textarea id="modalNoteDesc" rows="3" placeholder="Key topics covered, formulas included, and revision points..." required></textarea>
         </div>
         <div class="modal-actions">
-          <button type="submit" class="btn-primary">Save Note Material</button>
+          <button type="submit" class="btn-primary">🚀 Publish &amp; Upload Note</button>
           <button type="button" class="btn-secondary" onclick="closeNoteModal()">Cancel</button>
         </div>
       </form>
@@ -700,31 +775,83 @@
   </div>
 
   <!-- Add / Edit Board Question Paper Modal -->
-  <div id="paperModal" class="modal-overlay" style="display:none;">
+  <div id="paperModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closePaperModal()">
     <div class="modal-card">
       <div class="modal-header">
         <h3 id="paperModalTitle">Upload / Add Board Question Paper</h3>
         <button class="modal-close" onclick="closePaperModal()">&times;</button>
       </div>
       <form id="paperModalForm" class="modal-form">
+        <!-- Question Paper File Upload Section -->
+        <div class="form-group document-upload-group">
+          <label for="modalPaperFile">📄 Select &amp; Upload Question Paper File (PDF, Word, Image) <span class="required">*</span></label>
+          <div class="file-dropzone" id="paperFileDropzone" tabindex="0" role="button" aria-label="Choose question paper file from your computer">
+            <div class="dropzone-icon">📝</div>
+            <div class="dropzone-text"><strong>Click here or drag &amp; drop</strong> to select a question paper file</div>
+            <div class="dropzone-hint">Supports PDF, DOCX, JPG, PNG (up to 25 MB)</div>
+            <button type="button" class="btn-browse-file btn-primary" onclick="document.getElementById('modalPaperFile').click()">➕ Add File from Computer</button>
+            <input type="file" id="modalPaperFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="display:none;">
+          </div>
+          <div id="paperFileSelectedPreview" class="file-selected-preview" style="display:none;">
+            <span class="file-icon">📎</span>
+            <div class="file-info">
+              <strong id="paperSelectedFileName">paper.pdf</strong>
+              <span id="paperSelectedFileSize" class="file-size-badge">1.8 MB</span>
+            </div>
+            <button type="button" class="btn-remove-file" id="removePaperFileBtn" title="Remove selected file">&times;</button>
+          </div>
+          <div class="form-group" style="margin-top:0.75rem;">
+            <label for="modalPaperUrl">Or Paper Google Drive / External URL (Optional)</label>
+            <input type="url" id="modalPaperUrl" placeholder="https://...">
+          </div>
+        </div>
+
+        <!-- Optional Solution File Upload Section -->
+        <div class="form-group document-upload-group">
+          <label for="modalPaperSolutionFile">🔑 Upload Model Solution / Answer Key Document (Optional)</label>
+          <div class="file-dropzone" id="paperSolutionDropzone" tabindex="0" role="button" aria-label="Choose solution file from your computer">
+            <div class="dropzone-icon">💡</div>
+            <div class="dropzone-text"><strong>Click here or drag &amp; drop</strong> to select a solution file or answer key</div>
+            <button type="button" class="btn-browse-file btn-primary" onclick="document.getElementById('modalPaperSolutionFile').click()">➕ Add File from Computer</button>
+            <input type="file" id="modalPaperSolutionFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="display:none;">
+          </div>
+          <div id="paperSolutionSelectedPreview" class="file-selected-preview" style="display:none;">
+            <span class="file-icon">🔑</span>
+            <div class="file-info">
+              <strong id="paperSolutionSelectedName">solution.pdf</strong>
+              <span id="paperSolutionSelectedSize" class="file-size-badge">2.0 MB</span>
+            </div>
+            <button type="button" class="btn-remove-file" id="removePaperSolutionBtn" title="Remove selected solution">&times;</button>
+          </div>
+          <div class="form-group" style="margin-top:0.75rem;">
+            <label for="modalPaperSolutionUrl">Or Solution Google Drive / External URL (Optional)</label>
+            <input type="url" id="modalPaperSolutionUrl" placeholder="https://...">
+          </div>
+        </div>
+
         <div class="form-group">
           <label for="modalPaperTitle">Paper Title <span class="required">*</span></label>
           <input type="text" id="modalPaperTitle" placeholder="e.g. Class 10 SSC Mathematics Part 1 March 2024 Board Paper" required>
         </div>
-        <div class="form-group">
-          <label for="modalPaperStandard">Standard / Class <span class="required">*</span></label>
-          <select id="modalPaperStandard" required>
-            <option value="Standard 10 (SSC)">Standard 10 (SSC)</option>
-            <option value="Standard 12 (HSC)">Standard 12 (HSC)</option>
-            <option value="Standard 9">Standard 9</option>
-            <option value="Standard 8">Standard 8</option>
-            <option value="Special: Stock Market">Special: Stock Market</option>
-            <option value="Special: AI & Generative AI">Special: AI &amp; Generative AI</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="modalPaperSubject">Subject <span class="required">*</span></label>
-          <input type="text" id="modalPaperSubject" placeholder="e.g. Mathematics Part 1 (Algebra)" required>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="modalPaperStandard">Standard / Class <span class="required">*</span></label>
+            <select id="modalPaperStandard" required>
+              <option value="Standard 10 (SSC)">Standard 10 (SSC)</option>
+              <option value="Standard 12 (Science)">Standard 12 (Science)</option>
+              <option value="Standard 12 (Commerce)">Standard 12 (Commerce)</option>
+              <option value="Standard 11 (Science)">Standard 11 (Science)</option>
+              <option value="Standard 11 (Commerce)">Standard 11 (Commerce)</option>
+              <option value="Standard 9">Standard 9</option>
+              <option value="Standard 8">Standard 8</option>
+              <option value="Special: Stock Market">Special: Stock Market</option>
+              <option value="Special: AI & Generative AI">Special: AI &amp; Generative AI</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="modalPaperSubject">Subject <span class="required">*</span></label>
+            <input type="text" id="modalPaperSubject" placeholder="e.g. Mathematics Part 1 (Algebra)" required>
+          </div>
         </div>
         <div class="form-row-2">
           <div class="form-group">
@@ -755,7 +882,7 @@
           <textarea id="modalPaperDesc" rows="3" placeholder="Official board examination question paper with worked-out solutions and marking scheme..." required></textarea>
         </div>
         <div class="modal-actions">
-          <button type="submit" class="btn-primary">Save Question Paper</button>
+          <button type="submit" class="btn-primary">🚀 Publish Question Paper</button>
           <button type="button" class="btn-secondary" onclick="closePaperModal()">Cancel</button>
         </div>
       </form>
@@ -935,6 +1062,69 @@
         <button class="btn-primary" onclick="window.print()">🖨️ Print Receipt</button>
         <button class="btn-secondary" onclick="document.getElementById('printReceiptModal').style.display='none'">Close</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Timetable Modal -->
+  <div id="timetableModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeTimetableModal()">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="timetableModalTitle">Add Timetable Entry</h3>
+        <button class="modal-close" onclick="closeTimetableModal()">&times;</button>
+      </div>
+      <form id="timetableForm" class="modal-form">
+        <input type="hidden" id="modalTimetableIndex">
+        <div class="form-group">
+          <label for="modalTtStandard">Standard / Course <span class="required">*</span></label>
+          <select id="modalTtStandard" required>
+            <option value="Standard 8">Standard 8</option>
+            <option value="Standard 9">Standard 9</option>
+            <option value="Standard 10 (SSC)">Standard 10 (SSC)</option>
+            <option value="Standard 11 (Science)">Standard 11 (Science)</option>
+            <option value="Standard 11 (Commerce)">Standard 11 (Commerce)</option>
+            <option value="Standard 12 (Science)">Standard 12 (Science)</option>
+            <option value="Standard 12 (Commerce)">Standard 12 (Commerce)</option>
+            <option value="Special: Financial Literacy">Special: Financial Literacy</option>
+            <option value="Special: Stock Market">Special: Stock Market</option>
+            <option value="Special: AI / ML for Teens">Special: AI / ML for Teens</option>
+          </select>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="modalTtDays">Days / Schedule <span class="required">*</span></label>
+            <select id="modalTtDays" required>
+              <option value="Monday to Friday">Monday to Friday</option>
+              <option value="Monday, Wednesday, Friday">Monday, Wednesday, Friday</option>
+              <option value="Tuesday, Thursday, Saturday">Tuesday, Thursday, Saturday</option>
+              <option value="Saturday & Sunday">Saturday & Sunday</option>
+              <option value="Monday to Saturday">Monday to Saturday</option>
+              <option value="Daily Batch">Daily Batch</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="modalTtTime">Time Slot <span class="required">*</span></label>
+            <input type="text" id="modalTtTime" placeholder="e.g. 4:00 PM – 5:00 PM" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="modalTtSubjects">Subjects Covered <span class="required">*</span></label>
+          <input type="text" id="modalTtSubjects" placeholder="e.g. Mathematics & General Science" required>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="modalTtFaculty">Faculty / Teacher <span class="required">*</span></label>
+            <input type="text" id="modalTtFaculty" placeholder="e.g. Nikhillesh Bhatkar Sir" required>
+          </div>
+          <div class="form-group">
+            <label for="modalTtRoom">Room / Classroom</label>
+            <input type="text" id="modalTtRoom" placeholder="e.g. Classroom 1" value="Classroom 1">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn-primary" id="saveTimetableSubmitBtn">💾 Save Timetable Entry</button>
+          <button type="button" class="btn-secondary" onclick="closeTimetableModal()">Cancel</button>
+        </div>
+      </form>
     </div>
   </div>
 

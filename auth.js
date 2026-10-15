@@ -1934,3 +1934,89 @@ const Auth = {
     return user;
   }
 };
+
+// Global Document Download & File Generation Utility
+window.downloadDocumentFile = function(item, fallbackTitle, docType) {
+  if (!item) return;
+
+  // Case 1: item has uploaded Base64 Data URL or blob URL
+  const fileData = (docType === 'solution' ? item.solutionData : item.fileData) || item.fileData;
+  if (fileData && (fileData.startsWith('data:') || fileData.startsWith('blob:'))) {
+    const a = document.createElement('a');
+    a.href = fileData;
+    let fileName = (docType === 'solution' ? item.solutionFileName : item.fileName) || item.fileName;
+    if (!fileName) {
+      const ext = (item.fileType || 'pdf').toLowerCase().replace(/[^a-z0-9]/g, '');
+      fileName = `${(item.title || fallbackTitle || 'academy_document').replace(/[^a-zA-Z0-9_-]/g, '_')}.${ext || 'pdf'}`;
+    }
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    return;
+  }
+
+  // Case 2: item has an external web link or cloud URL (e.g. Google Drive, PDF URL)
+  if (item.downloadUrl && item.downloadUrl !== '#' && (item.downloadUrl.startsWith('http://') || item.downloadUrl.startsWith('https://'))) {
+    window.open(item.downloadUrl, '_blank');
+    return;
+  }
+
+  // Case 3: Sample / mock item without uploaded file -> generate official Academy Document
+  const cleanTitle = (docType === 'solution' ? `${item.title || fallbackTitle} — Model Solution & Answer Key` : (item.title || fallbackTitle || 'Study Document'));
+  const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>${cleanTitle} — Nikhillesh Bhatkar Learning Academy</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; color: #1e293b; max-width: 850px; margin: auto; line-height: 1.6; }
+    .header { border-bottom: 3px solid #1e3a8a; padding-bottom: 20px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+    .brand { font-size: 24px; font-weight: bold; color: #1e3a8a; }
+    .badge { background: #dbeafe; color: #1e40af; padding: 4px 10px; border-radius: 4px; font-size: 13px; font-weight: bold; }
+    h1 { font-size: 22px; color: #0f172a; margin-top: 0; }
+    .meta-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 25px; font-size: 14px; border: 1px solid #e2e8f0; }
+    .content-box { border: 1px solid #e2e8f0; border-radius: 8px; padding: 22px; margin-bottom: 25px; background: #ffffff; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .footer { border-top: 1px solid #e2e8f0; padding-top: 20px; font-size: 12px; color: #64748b; text-align: center; }
+    .print-btn { background: #1e3a8a; color: #fff; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin-bottom: 20px; }
+    @media print { .print-btn { display: none; } }
+  </style>
+</head>
+<body>
+  <button class="print-btn" onclick="window.print()">🖨️ Print or Save as PDF</button>
+  <div class="header">
+    <div>
+      <div class="brand">🏛️ NIKHILLESH BHATKAR LEARNING ACADEMY</div>
+      <small>Sangameshwar, Ratnagiri, Maharashtra | Official Academy Material</small>
+    </div>
+    <span class="badge">${item.standard || 'All Classes'}</span>
+  </div>
+  <h1>${cleanTitle}</h1>
+  <div class="meta-grid">
+    <div><strong>Subject:</strong> ${item.subject || 'All Subjects'}</div>
+    <div><strong>Category:</strong> ${item.type || (item.chapter ? 'Chapter Revision Notes' : 'Board Examination Paper')}</div>
+    <div><strong>Session / Year:</strong> ${item.year || item.date || '2025–2026'}</div>
+    <div><strong>Document Format:</strong> Official Academy Study Document</div>
+  </div>
+  <div class="content-box">
+    <h3>📖 Document Overview & Key Learning Points</h3>
+    <p>${item.description || 'Comprehensive revision study material curated for academic excellence by Nikhillesh Bhatkar Sir.'}</p>
+    ${item.blueprint ? `<h4>📋 Examination Structure & Blueprint</h4><p>${item.blueprint}</p>` : ''}
+  </div>
+  <div class="footer">
+    <p><strong>Nikhillesh Bhatkar Learning Academy</strong> • Empowering Academic Excellence in SSC & HSC Mathematics & Science</p>
+    <p>Helpline: +91 83800 96494 | Sangameshwar, Maharashtra</p>
+  </div>
+</body>
+</html>`;
+
+  const blob = new Blob([htmlContent], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${cleanTitle.replace(/[^a-zA-Z0-9_-]/g, '_')}_Academy_Document.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
