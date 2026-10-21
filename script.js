@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="testimonial-badge">${t.badge || '🏆 Academy Topper'}</span>
             <span class="testimonial-score">${t.score || ''}</span>
           </div>
+          ${t.photo ? `<img src="${t.photo}" alt="${t.name}" class="testimonial-photo" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid #cba235;margin:12px auto;display:block;">` : ''}
           <p class="testimonial-quote">&ldquo;${t.quote || ''}&rdquo;</p>
           <div class="testimonial-author-block">
             <strong class="testimonial-author">${t.name}</strong>

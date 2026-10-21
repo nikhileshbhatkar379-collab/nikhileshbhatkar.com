@@ -298,6 +298,11 @@ let uploadedPaperFileData = null;
 let uploadedPaperFileName = '';
 let uploadedPaperFileType = 'PDF';
 
+// Topper photo state variables
+let uploadedTopperPhotoData = null;
+let uploadedTopperPhotoName = '';
+let uploadedTopperPhotoType = 'JPG';
+
 let uploadedSolutionFileData = null;
 let uploadedSolutionFileName = '';
 
@@ -707,7 +712,7 @@ window.printStudentReportCard = function(studentId) {
       <div class="receipt-header">
         <h2>🏛️ NIKHILLESH BHATKAR LEARNING ACADEMY</h2>
         <p>Near S.T. Stand, Sangameshwar, Dist. Ratnagiri — 415611</p>
-        <p><strong>Contact:</strong> +91 83800 96494 • +91 94220 54101</p>
+        <p><strong>Contact:</strong> +91 83800 96494</p>
         <hr style="margin:12px 0;">
         <h3 style="text-transform:uppercase;letter-spacing:1px;color:#1e3c72;">Student Academic Progress &amp; Report Card</h3>
       </div>
@@ -976,7 +981,7 @@ window.printReceipt = function(receiptNo) {
       <div class="receipt-header" style="text-align:center;border-bottom:2px solid #1e3c72;padding-bottom:12px;margin-bottom:16px;">
         <h2 style="color:#1e3c72;margin:0 0 4px 0;">🏛️ NIKHILLESH BHATKAR LEARNING ACADEMY</h2>
         <p style="margin:0;font-size:13px;color:#555;">Near S.T. Stand, Sangameshwar, Dist. Ratnagiri — 415611</p>
-        <p style="margin:2px 0 0 0;font-size:13px;color:#555;"><strong>Contact:</strong> +91 83800 96494 • +91 94220 54101 | <strong>UPI:</strong> nikhileshbhatkar379@oksbi</p>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#555;"><strong>Contact:</strong> +91 83800 96494 | <strong>UPI:</strong> nikhileshbhatkar379@oksbi</p>
         <h3 style="margin:12px 0 0 0;text-transform:uppercase;color:#27ae60;letter-spacing:1px;">OFFICIAL FEE RECEIPT</h3>
       </div>
       <div style="display:flex;justify-content:space-between;margin-bottom:16px;font-size:14px;">
@@ -1165,7 +1170,7 @@ function renderToppersManager() {
         <button class="btn-sm btn-delete" onclick="deleteTopper(${idx})" title="Delete Topper">🗑️</button>
       </div>
       <div style="display:flex;align-items:center;gap:12px;margin:12px 0;">
-        <div style="font-size:36px;background:#fef3c7;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;">👨‍🎓</div>
+        ${t.photo ? `<img src="${t.photo}" alt="${t.name}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid #cba235;">` : `<div style="font-size:36px;background:#fef3c7;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;">👨‍🎓</div>`}
         <div>
           <h3 style="margin:0;font-size:18px;">${t.name}</h3>
           <p style="margin:2px 0;color:#e67e22;font-weight:bold;font-size:16px;">${t.score} — ${t.exam} (${t.year})</p>
@@ -1180,6 +1185,11 @@ function renderToppersManager() {
 
 window.openAddTopperModal = function() {
   document.getElementById('topperModalForm').reset();
+  uploadedTopperPhotoData = null;
+  uploadedTopperPhotoName = '';
+  uploadedTopperPhotoType = 'JPG';
+  const photoPreview = document.getElementById('topperPhotoSelectedPreview');
+  if (photoPreview) photoPreview.style.display = 'none';
   document.getElementById('topperModal').style.display = 'flex';
 };
 
@@ -1939,6 +1949,87 @@ function setupEventListeners() {
     });
   }
 
+  // -----------------------------------------------------------
+  // STUDENT PHOTO UPLOAD: HALL OF FAME TOPPER
+  // -----------------------------------------------------------
+  const topperPhotoInput = document.getElementById('modalTopperPhoto');
+  const topperPhotoDropzone = document.getElementById('topperPhotoDropzone');
+  const topperPhotoPreview = document.getElementById('topperPhotoSelectedPreview');
+  const removeTopperPhotoBtn = document.getElementById('removeTopperPhotoBtn');
+
+  function handleTopperPhotoSelection(file) {
+    if (!file) return;
+    uploadedTopperPhotoName = file.name;
+    const ext = file.name.split('.').pop().toUpperCase();
+    uploadedTopperPhotoType = ext || 'JPG';
+    const formattedSize = formatByteSize(file.size);
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      uploadedTopperPhotoData = e.target.result;
+    };
+    reader.readAsDataURL(file);
+
+    if (topperPhotoPreview) {
+      const nameEl = document.getElementById('topperPhotoSelectedFileName');
+      const sizeEl = document.getElementById('topperPhotoSelectedFileSize');
+      if (nameEl) nameEl.textContent = file.name;
+      if (sizeEl) sizeEl.textContent = formattedSize;
+      topperPhotoPreview.style.display = 'flex';
+    }
+  }
+
+  if (topperPhotoInput) {
+    topperPhotoInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleTopperPhotoSelection(e.target.files[0]);
+      }
+    });
+  }
+
+  if (topperPhotoDropzone) {
+    topperPhotoDropzone.addEventListener('click', (e) => {
+      if (e.target === topperPhotoDropzone || e.target.closest('.dropzone-icon') || e.target.closest('.dropzone-text') || e.target.closest('.dropzone-hint')) {
+        topperPhotoInput?.click();
+      }
+    });
+    ['dragenter', 'dragover'].forEach(eventName => {
+      topperPhotoDropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        topperPhotoDropzone.classList.add('drag-over');
+      });
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+      topperPhotoDropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        topperPhotoDropzone.classList.remove('drag-over');
+      });
+    });
+    topperPhotoDropzone.addEventListener('drop', (e) => {
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleTopperPhotoSelection(e.dataTransfer.files[0]);
+      }
+    });
+    topperPhotoDropzone.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        topperPhotoInput?.click();
+      }
+    });
+  }
+
+  if (removeTopperPhotoBtn) {
+    removeTopperPhotoBtn.addEventListener('click', () => {
+      uploadedTopperPhotoData = null;
+      uploadedTopperPhotoName = '';
+      uploadedTopperPhotoType = 'JPG';
+      if (topperPhotoInput) topperPhotoInput.value = '';
+      if (topperPhotoPreview) topperPhotoPreview.style.display = 'none';
+    });
+  }
+
   // Student Form Submission
   const studentForm = document.getElementById('studentModalForm');
   if (studentForm) {
@@ -2192,12 +2283,19 @@ function setupEventListeners() {
         year: document.getElementById('modalTopperYear').value.trim(),
         subjects: document.getElementById('modalTopperSubjects').value.trim() || 'Maths & Science',
         quote: document.getElementById('modalTopperQuote').value.trim(),
-        badge: '🏆 Academy Star Merit'
+        badge: '🏆 Academy Star Merit',
+        photo: uploadedTopperPhotoData || null,
+        photoName: uploadedTopperPhotoName || '',
+        photoType: uploadedTopperPhotoType || 'JPG'
       });
 
       AcademyDB.saveToppers(toppers);
       document.getElementById('topperModal').style.display = 'none';
       topperForm.reset();
+      uploadedTopperPhotoData = null;
+      uploadedTopperPhotoName = '';
+      uploadedTopperPhotoType = 'JPG';
+      if (topperPhotoPreview) topperPhotoPreview.style.display = 'none';
       renderToppersManager();
       alert('🏆 Added student achievement to Hall of Fame!');
     });

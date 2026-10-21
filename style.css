@@ -879,7 +879,76 @@ tr:hover { background: #f8fafc; }
   line-height: 1.5;
 }
 
+/* Payment / QR section */
+.payment-section {
+  max-width: 640px;
+  margin: 1.5rem auto 0;
+}
+.payment-card {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.8rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+.payment-qr-wrap {
+  flex: 0 0 180px;
+  width: 180px;
+  height: 180px;
+  background: #ffffff;
+  border: 2px solid #cba235;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  box-shadow: 0 2px 10px rgba(203, 162, 53, 0.25);
+}
+.payment-qr {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+}
+.payment-qr-placeholder {
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: #0a2540;
+  text-align: center;
+}
+.payment-info h3 {
+  margin: 0 0 0.5rem;
+  color: #0a2540;
+  font-size: 1.2rem;
+}
+.upi-id {
+  font-family: 'Courier New', monospace;
+  font-size: 1.05rem;
+  font-weight: bold;
+  color: #cba235;
+  background: #fff8e7;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+.payment-hint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.5;
+}
+
 /* Faculty */
+
+/* Payment section responsive tweaks */
+@media (max-width: 480px) {
+  .payment-card { flex-direction: column; gap: 0.8rem; }
+  .payment-qr-wrap { width: 140px; height: 140px; }
+}
 .faculty-card {
   text-align: center;
   display: flex;

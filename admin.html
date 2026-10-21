@@ -1008,6 +1008,25 @@
           <label for="modalTopperQuote">Student / Parent Testimonial</label>
           <textarea id="modalTopperQuote" rows="2" placeholder="What the student or parent says about the academy..."></textarea>
         </div>
+        <!-- Student Photo Upload -->
+        <div class="form-group document-upload-group">
+          <label for="modalTopperPhoto">📸 Student Photo (Optional)</label>
+          <div class="file-dropzone" id="topperPhotoDropzone" tabindex="0" role="button" aria-label="Choose student photo from your computer">
+            <div class="dropzone-icon">🖼️</div>
+            <div class="dropzone-text"><strong>Click here or drag &amp; drop</strong> to select a student photo</div>
+            <div class="dropzone-hint">Supports JPG, PNG, WEBP (up to 10 MB) — shown in Hall of Fame</div>
+            <button type="button" class="btn-browse-file btn-primary" onclick="document.getElementById('modalTopperPhoto').click()">➕ Add File from Computer</button>
+            <input type="file" id="modalTopperPhoto" accept=".jpg,.jpeg,.png,.webp" style="display:none;">
+          </div>
+          <div id="topperPhotoSelectedPreview" class="file-selected-preview" style="display:none;">
+            <span class="file-icon">🖼️</span>
+            <div class="file-info">
+              <strong id="topperPhotoSelectedFileName">student.jpg</strong>
+              <span id="topperPhotoSelectedFileSize" class="file-size-badge">1.2 MB</span>
+            </div>
+            <button type="button" class="btn-remove-file" id="removeTopperPhotoBtn" title="Remove selected photo">&times;</button>
+          </div>
+        </div>
         <div class="modal-actions">
           <button type="submit" class="btn-primary">Add to Hall of Fame</button>
           <button type="button" class="btn-secondary" onclick="document.getElementById('topperModal').style.display='none'">Cancel</button>

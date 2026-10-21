@@ -51,6 +51,7 @@
           <li><a href="#special-courses" data-i18n="nav_special_courses">Special Courses</a></li>
           <li><a href="#syllabus" data-i18n="nav_syllabus">Syllabus</a></li>
           <li><a href="#fees" data-i18n="nav_fees">Fees</a></li>
+          <li><a href="#payment" data-i18n="nav_payments">Payments</a></li>
           <li><a href="#faculty" data-i18n="nav_faculty">Faculty</a></li>
           <li><a href="#testimonials" data-i18n="nav_testimonials">Testimonials</a></li>
           <li><a href="#gallery" data-i18n="nav_gallery">Gallery</a></li>
@@ -742,6 +743,25 @@
       <p class="fee-note">📌 <strong>Note:</strong> Standard 12 fee is ₹5,000 per subject (Mathematics, Physics, Chemistry). Standard 8, 9, and 10 fees are ₹800, ₹900, and ₹1,000 per month respectively for a 10-month academic term.</p>
     </section>
 
+    <!-- Payment / QR -->
+    <section id="payment" class="content-section">
+      <h2>Payments</h2>
+      <p class="section-subtitle">Scan the QR code or use UPI to pay fees directly</p>
+      <div class="payment-section">
+        <div class="payment-card">
+          <div class="payment-qr-wrap">
+            <img src="payment-qr.png" alt="Payment QR code" class="payment-qr" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="payment-qr-placeholder" style="display:none;">📱 Scan QR</div>
+          </div>
+          <div class="payment-info">
+            <h3>Pay via UPI</h3>
+            <p class="upi-id" id="upi-id">nikhileshbhatkar379@oksbi</p>
+            <p class="payment-hint">Open any UPI app (GPay, PhonePe, Paytm), tap <strong>Scan</strong> and point at the QR code above, or search the UPI ID manually.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Faculty -->
     <section id="faculty" class="content-section">
       <h2 data-i18n="faculty_title">Our Faculty</h2>
@@ -749,7 +769,7 @@
 
         <article class="card faculty-card highlight-founder">
           <div class="faculty-avatar-wrapper">
-            <img src="faculty-nikhillesh.jpg" alt="Photo of Nikhillesh Bhatkar" class="faculty-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <img src="faculty-profile.png" alt="Photo of Nikhillesh Bhatkar" class="faculty-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
             <div class="faculty-avatar-placeholder" style="display:none;">👨‍🏫</div>
           </div>
           <h3 class="faculty-name">Nikhillesh Bhatkar</h3>
@@ -965,6 +985,12 @@
   <script src="auth.js"></script>
   <script src="i18n.js"></script>
   <script src="chatbot.js"></script>
-  <script src="script.js"></script>
+  <script>
+  // UPI ID — edit this single value to change it everywhere on the site
+  window.ACADEMY_UPI_ID = 'nikhileshbhatkar379@oksbi';
+  const upiEl = document.getElementById('upi-id');
+  if (upiEl) upiEl.textContent = window.ACADEMY_UPI_ID;
+</script>
+<script src="script.js"></script>
 </body>
 </html>
