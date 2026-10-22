@@ -199,7 +199,7 @@
     if (/timing|time|batch|schedule|timetable|वेळ|वेळापत्रक|समय|टाइम|कब/i.test(raw)) {
       if (lang === 'mr') {
         return {
-          text: `⏰ **नियमित बॅच वेळापत्रक (सोमवार ते शुक्रवार):**\n\n• **इयत्ता ८ वी:** दुपारी ४:०० ते ५:०० (गणित / विज्ञान)\n• **इयत्ता ९ वी:** सायंकाळी ५:०० ते ६:०० (गणित / विज्ञान)\n• **इयत्ता १० वी (SSC):** सायंकाळी ६:०० ते ७:३० (बीजगणित / भूमिती / विज्ञान)\n• **इयत्ता १२ वी (HSC):** रात्री ७:३० ते ९:०० (Physics / Chemistry)\n\n• **शनिवार:** रिव्हिजन, शंका निरसन व HSC न्यूमेरिकल्स\n• **रविवार:** सकाळी ९:०० ते १२:०० सराव चाचणी परीक्षा`,
+          text: `⏰ **नियमित बॅच वेळापत्रक (सोमवार ते शुक्रवार):**\n\n• **इयत्ता १२ वी (HSC):** सकाळी ७:१५ ते ८:३० (Physics / Chemistry) — *रोज*\n• **इयत्ता १० वी (SSC):** सायंकाळी ६:१५ ते ७:०० (बीजगणित / भूमिती / विज्ञान)\n• **इयत्ता ९ वी:** सायंकाळी ७:०० ते ७:४५ (गणित / विज्ञान)\n• **इयत्ता ८ वी:** सायंकाळी ७:४५ ते ८:३० (गणित / विज्ञान)\n\n• **शनिवार:** रिव्हिजन, शंका निरसन व HSC न्यूमेरिकल्स\n• **रविवार:** सकाळी ९:०० ते १२:०० सराव चाचणी परीक्षा`,
           chips: [
             { label: '🎯 डेमो क्लास बुक करा', query: 'book demo' },
             { label: '💰 फी रचना पहा', query: 'fees' },
@@ -208,7 +208,7 @@
         };
       } else if (lang === 'hi') {
         return {
-          text: `⏰ **नियमित बैच समय सारणी (सोमवार से शुक्रवार):**\n\n• **कक्षा ८वीं:** दोपहर ४:०० से ५:०० (गणित / विज्ञान)\n• **कक्षा ९वीं:** शाम ५:०० से ६:०० (गणित / विज्ञान)\n• **कक्षा १०वीं (SSC):** शाम ६:०० से ७:३० (बीजगणित / रेखागणित / विज्ञान)\n• **कक्षा १२वीं (HSC):** रात्रि ७:३० से ९:०० (भौतिकी / रसायन)\n\n• **शनिवार:** रिवीजन, न्यूमेरिकल हल और डाउट सेशन\n• **रविवार:** सुबह ९:०० से १२:०० साप्ताहिक टेस्ट सीरीज`,
+          text: `⏰ **नियमित बैच समय सारणी (सोमवार से शुक्रवार):**\n\n• **कक्षा १२वीं (HSC):** सुबह ७:१५ से ८:३० (भौतिकी / रसायन) — *रोज*\n• **कक्षा १०वीं (SSC):** शाम ६:१५ से ७:०० (बीजगणित / रेखागणित / विज्ञान)\n• **कक्षा ९वीं:** शाम ७:०० से ७:४५ (गणित / विज्ञान)\n• **कक्षा ८वीं:** शाम ७:४५ से ८:३० (गणित / विज्ञान)\n\n• **शनिवार:** रिवीजन, न्यूमेरिकल हल और डाउट सेशन\n• **रविवार:** सुबह ९:०० से १२:०० साप्ताहिक टेस्ट सीरीज`,
           chips: [
             { label: '🎯 डेमो क्लास बुक करें', query: 'book demo' },
             { label: '💰 शुल्क देखें', query: 'fees' },
@@ -217,7 +217,7 @@
         };
       } else {
         return {
-          text: `⏰ **Regular Batch Timetable (Monday – Friday):**\n\n• **Class 8:** 4:00 PM – 5:00 PM (Maths & Science)\n• **Class 9:** 5:00 PM – 6:00 PM (Maths & Science)\n• **Class 10 (SSC):** 6:00 PM – 7:30 PM (Algebra, Geometry, Science)\n• **Class 12 (HSC):** 7:30 PM – 9:00 PM (Physics & Chemistry)\n\n• **Saturday:** Revision, doubt solving & HSC numericals\n• **Sunday:** 9:00 AM – 12:00 PM Weekly board exam practice test`,
+          text: `⏰ **Regular Batch Timetable (Monday – Saturday):**\n\n• **Class 12 (HSC):** 7:15 AM – 8:30 AM (Physics & Chemistry) — *Every day*\n• **Class 10 (SSC):** 6:15 PM – 7:00 PM (Algebra, Geometry, Science)\n• **Class 9:** 7:00 PM – 7:45 PM (Maths & Science)\n• **Class 8:** 7:45 PM – 8:30 PM (Maths & Science)\n\n• **Saturday:** Revision, doubt solving & HSC numericals\n• **Sunday:** 9:00 AM – 12:00 PM Weekly board exam practice test`,
           chips: [
             { label: '🎯 Book Free Demo', query: 'book demo' },
             { label: '💰 Check Fees', query: 'fees' },
