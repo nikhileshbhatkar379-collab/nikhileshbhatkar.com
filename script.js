@@ -51,11 +51,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (imgs.length === 0) placeholder.style.display = 'block';
   }
 
-  // Populate Toppers / Testimonials dynamically if AcademyDB is present
+  // Populate Toppers / Testimonials from the committed Hall of Fame data.
+  // The public site reads data/hall-of-fame.json so admin additions actually
+  // reach every visitor (localStorage is browser-local and never publishes).
+  // Falls back to AcademyDB localStorage for the admin's own live preview.
   const testimonialsGrid = document.querySelector('.testimonials-grid');
-  if (testimonialsGrid && typeof AcademyDB !== 'undefined' && typeof AcademyDB.getToppers === 'function') {
-    const toppers = AcademyDB.getToppers();
-    if (toppers && toppers.length > 0) {
+  if (testimonialsGrid) {
+    function renderToppers(toppers) {
+      if (!toppers || toppers.length === 0) return;
       testimonialsGrid.innerHTML = toppers.map(t => `
         <article class="card testimonial-card">
           <div class="testimonial-header">
@@ -72,6 +75,23 @@ document.addEventListener('DOMContentLoaded', () => {
         </article>
       `).join('');
     }
+
+    // 1. Try the committed file first — this is what the live site shows.
+    fetch('data/hall-of-fame.json', { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data && Array.isArray(data.toppers)) {
+          renderToppers(data.toppers);
+          return;
+        }
+        throw new Error('missing toppers array');
+      })
+      .catch(() => {
+        // 2. Fall back to the admin's local preview (same browser only).
+        if (typeof AcademyDB !== 'undefined' && typeof AcademyDB.getToppers === 'function') {
+          renderToppers(AcademyDB.getToppers());
+        }
+      });
   }
 });
 

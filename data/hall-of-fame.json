@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "updated": "2026-10-23",
+  "toppers": [
+    {
+      "name": "Sayali Sawant",
+      "score": "96.4%",
+      "exam": "SSC Board Exam",
+      "year": "2025",
+      "school": "Sangameshwar High School",
+      "subjects": "Maths: 100/100 • Science: 98/100",
+      "quote": "Nikhillesh Sir's chapter-wise preliminary tests and formula notes gave me the confidence to score 100 in Mathematics!",
+      "badge": "🏆 Academy Rank 1"
+    },
+    {
+      "name": "Aditya Kadam",
+      "score": "95.2%",
+      "exam": "SSC Board Exam",
+      "year": "2025",
+      "school": "Ninavi Secondary School",
+      "subjects": "Maths: 98/100 • Science: 96/100",
+      "quote": "The small batch size and individual doubt sessions helped clear all tricky Geometry and Physics concepts.",
+      "badge": "🥇 Gold Merit"
+    },
+    {
+      "name": "Prathamesh Shirke",
+      "score": "93.8%",
+      "exam": "HSC Science Board Exam",
+      "year": "2025",
+      "school": "Sangameshwar Junior College",
+      "subjects": "Physics: 95/100 • Chemistry: 94/100",
+      "quote": "Amit Pawaskar Sir's numerical problem-solving sessions made HSC Physics intuitive and scoring.",
+      "badge": "⭐ HSC Distinction"
+    },
+    {
+      "name": "Riddhi Kulkarni",
+      "score": "94.6%",
+      "exam": "SSC Board Exam",
+      "year": "2024",
+      "school": "Navnirman Vidyalaya",
+      "subjects": "Maths: 99/100 • Science: 95/100",
+      "quote": "Regular Sunday mock board tests eliminated exam anxiety completely. Best coaching in Sangameshwar!",
+      "badge": "🏆 SSC Star Performer"
+    }
+  ]
+}

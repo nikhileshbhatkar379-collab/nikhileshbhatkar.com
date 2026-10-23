@@ -2301,6 +2301,28 @@ function setupEventListeners() {
     });
   }
 
+  // Publish Hall of Fame to the public website.
+  // Downloads data/hall-of-fame.json so the admin can commit & push it —
+  // localStorage edits alone never reach other visitors.
+  document.getElementById('publishToppersBtn')?.addEventListener('click', () => {
+    const toppers = AcademyDB.getToppers() || [];
+    if (toppers.length === 0) {
+      alert('No toppers to publish. Add at least one first.');
+      return;
+    }
+    const payload = {
+      version: 1,
+      updated: new Date().toISOString().split('T')[0],
+      toppers
+    };
+    downloadFile(
+      JSON.stringify(payload, null, 2),
+      'data/hall-of-fame.json',
+      'application/json'
+    );
+    alert('✅ Downloaded data/hall-of-fame.json.\n\nReplace the file in your repo and commit + push to make these toppers live on the public site.');
+  });
+
   // Doubt Reply Form Submission
   const doubtReplyForm = document.getElementById('doubtReplyForm');
   if (doubtReplyForm) {

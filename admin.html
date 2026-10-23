@@ -587,8 +587,12 @@
       <section id="tab-toppers" class="admin-tab-content">
         <div class="section-title-row">
           <h2>🏆 Hall of Fame — Academy Toppers &amp; Achievements</h2>
-          <button class="btn-primary" id="openAddTopperBtn">+ Add Topper</button>
+          <div class="title-row-actions">
+            <button class="btn-primary" id="openAddTopperBtn">+ Add Topper</button>
+            <button class="btn-secondary" id="publishToppersBtn" title="Download the JSON this site publishes">📤 Publish to Website</button>
+          </div>
         </div>
+        <p class="section-hint">Edits here live in your browser. Click <strong>Publish to Website</strong> to make them visible to everyone — then commit &amp; push the downloaded file.</p>
         <div id="toppersGalleryAdmin" class="toppers-gallery-grid"></div>
       </section>
 
