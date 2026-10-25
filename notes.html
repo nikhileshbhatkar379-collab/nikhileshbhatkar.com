@@ -178,7 +178,17 @@
 
       function getMergedResources() {
         const notes = (AcademyDB.getNotes() || []).map(n => ({ ...n, itemCategory: 'note' }));
-        const papers = (AcademyDB.getPapers() || []).map(p => ({ ...p, itemCategory: 'paper' }));
+        let papers = (AcademyDB.getPapers() || []).map(p => ({ ...p, itemCategory: 'paper' }));
+
+        // Check if user is logged in as enrolled student
+        const currentUser = Auth.getCurrentUser();
+        const isEnrolledStudent = currentUser && currentUser.role === 'student';
+
+        // If not enrolled, filter to show only sample papers (free preview)
+        if (!isEnrolledStudent) {
+          papers = papers.filter(p => p.isSamplePaper === true || !p.enrollmentRequired);
+        }
+
         return [...papers, ...notes];
       }
 
@@ -252,12 +262,19 @@
             if (item.type === 'SCERT Question Bank') paperTypeBadge = 'badge-bank';
             if (item.type === 'Model Paper') paperTypeBadge = 'badge-model';
 
+            // Check if paper requires enrollment and user is not enrolled
+            const currentUser = Auth.getCurrentUser();
+            const isEnrolledStudent = currentUser && currentUser.role === 'student';
+            const requiresEnrollment = item.enrollmentRequired && !isEnrolledStudent;
+            const lockedBadge = requiresEnrollment ? '<span class="enrollment-lock-badge">🔒 Enrollment Required</span>' : '';
+
             return `
-              <article class="note-card paper-card">
+              <article class="note-card paper-card ${requiresEnrollment ? 'enrollment-restricted' : ''}">
                 <div class="note-card-header">
                   <span class="note-standard-tag">${item.standard}</span>
                   <span class="paper-type-pill ${paperTypeBadge}">📝 ${item.type}</span>
                   <span class="note-subject-tag ${tagClass}">${item.subject}</span>
+                  ${lockedBadge}
                 </div>
                 <h3 class="note-title">${item.title}</h3>
                 <div class="paper-highlight-row">
@@ -271,20 +288,26 @@
                   <span>📦 Size: <strong>${item.size || '2.5 MB'}</strong></span>
                   <span>📅 ${item.date || 'Board Official'}</span>
                 </div>
-                <div class="note-actions">
-                  <button class="btn-download-note" onclick="downloadSamplePaper('${item.id}', '${encodeURIComponent(item.title)}')">
-                    ⬇️ Download Paper PDF
-                  </button>
-                  ${item.solutionAvailable ? `
-                    <button class="btn-solution-note" onclick="viewPaperSolution('${item.id}', '${encodeURIComponent(item.title)}')">
-                      💡 Solution / Answer Key
+                ${requiresEnrollment ? `
+                  <div class="enrollment-message-box">
+                    <p>✨ This paper is available for enrolled students. <a href="login.html">Log in to access all 5 years of papers →</a></p>
+                  </div>
+                ` : `
+                  <div class="note-actions">
+                    <button class="btn-download-note" onclick="downloadSamplePaper('${item.id}', '${encodeURIComponent(item.title)}')">
+                      ⬇️ Download Paper PDF
                     </button>
-                  ` : `
-                    <button class="btn-preview-note" onclick="previewPaperOverview('${item.id}')">
-                      👁️ Overview
-                    </button>
-                  `}
-                </div>
+                    ${item.solutionAvailable ? `
+                      <button class="btn-solution-note" onclick="viewPaperSolution('${item.id}', '${encodeURIComponent(item.title)}')">
+                        💡 Solution / Answer Key
+                      </button>
+                    ` : `
+                      <button class="btn-preview-note" onclick="previewPaperOverview('${item.id}')">
+                        👁️ Overview
+                      </button>
+                    `}
+                  </div>
+                `}
               </article>
             `;
           } else {

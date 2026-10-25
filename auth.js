@@ -265,7 +265,9 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.5 MB",
     "description": "Official Maharashtra SSC Board March 2024 Algebra question paper with complete solutions: Linear Equations, Quadratic Equations, Arithmetic Progression, Financial Planning, Probability & Statistics.",
-    "blueprint": "Q1: 4 MCQs (4M) + 4 Sub-questions (4M); Q2: 2 Activity (4M) + 4 Solve (8M); Q3: 1 Activity (3M) + 2 Solve (6M); Q4: 2 HOTS (8M); Q5: 1 Creative problem (3M)."
+    "blueprint": "Q1: 4 MCQs (4M) + 4 Sub-questions (4M); Q2: 2 Activity (4M) + 4 Solve (8M); Q3: 1 Activity (3M) + 2 Solve (6M); Q4: 2 HOTS (8M); Q5: 1 Creative problem (3M).",
+    "enrollmentRequired": true,
+    "isSamplePaper": true
   },
   {
     "id": "PAPER-SSC-2024-GEO",
@@ -282,7 +284,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.9 MB",
     "description": "Official Maharashtra SSC Board March 2024 Geometry paper with step-by-step proofs of Pythagoras Theorem, Circle Tangents, Geometric Constructions, Coordinate Geometry, and Trigonometry.",
-    "blueprint": "Q1: 4 MCQs (4M) + 4 Solve (4M); Q2: 2 Activity (4M) + 4 Solve (8M); Q3: 1 Activity (3M) + 2 Proofs (6M); Q4: 2 HOTS non-textual (8M); Q5: 1 Open-ended (3M)."
+    "blueprint": "Q1: 4 MCQs (4M) + 4 Solve (4M); Q2: 2 Activity (4M) + 4 Solve (8M); Q3: 1 Activity (3M) + 2 Proofs (6M); Q4: 2 HOTS non-textual (8M); Q5: 1 Open-ended (3M).",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2024-SCI1",
@@ -299,7 +302,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.4 MB",
     "description": "Official SSC Board March 2024 Science 1 covering Gravitation numericals, Periodic Classification trends, Chemical Reactions, Effects of Electric Current, Refraction, and Space Missions.",
-    "blueprint": "Q1(A): 5 MCQs (5M); Q1(B): 5 Objectives (5M); Q2(A): 2 Scientific reasons (4M); Q2(B): 3 Short answers (6M); Q3: 5 Questions (15M); Q4: 1 Long conceptual question (5M)."
+    "blueprint": "Q1(A): 5 MCQs (5M); Q1(B): 5 Objectives (5M); Q2(A): 2 Scientific reasons (4M); Q2(B): 3 Short answers (6M); Q3: 5 Questions (15M); Q4: 1 Long conceptual question (5M).",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2024-SCI2",
@@ -316,7 +320,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.3 MB",
     "description": "Official SSC Board March 2024 Science 2 paper with labeled diagrams, cell biology processes, Darwinism vs Lamarckism, environmental management flowcharts, and biotechnology applications.",
-    "blueprint": "Q1(A): 5 MCQs (5M); Q1(B): 5 Objectives (5M); Q2(A): 2 Scientific reasons (4M); Q2(B): 3 Short questions (6M); Q3: 5 Paragraph/Diagram questions (15M); Q4: 1 Detailed answer (5M)."
+    "blueprint": "Q1(A): 5 MCQs (5M); Q1(B): 5 Objectives (5M); Q2(A): 2 Scientific reasons (4M); Q2(B): 3 Short questions (6M); Q3: 5 Paragraph/Diagram questions (15M); Q4: 1 Detailed answer (5M).",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2024-ENG",
@@ -333,7 +338,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "4.2 MB",
     "description": "Maharashtra SSC Board March 2024 English question paper with textual passages, poetry appreciation, non-textual comprehension, grammar transformations, and writing skills models.",
-    "blueprint": "Section I: Language Study (10M); Section II: Textual Passages (20M); Section III: Poetry (10M); Section IV: Non-textual Passage (15M); Section V: Writing Skills (20M); Section VI: Creative Writing (5M)."
+    "blueprint": "Section I: Language Study (10M); Section II: Textual Passages (20M); Section III: Poetry (10M); Section IV: Non-textual Passage (15M); Section V: Writing Skills (20M); Section VI: Creative Writing (5M).",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2023-ALG",
@@ -350,7 +356,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.1 MB",
     "description": "Official Maharashtra SSC Board March 2023 Algebra paper with complete model answer key, Cramer's rule matrix calculations, quadratic factorization, and GST invoice solutions.",
-    "blueprint": "Full Maharashtra Board 40-mark standard pattern with activity worksheets and step-by-step marking rubric."
+    "blueprint": "Full Maharashtra Board 40-mark standard pattern with activity worksheets and step-by-step marking rubric.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2023-GEO",
@@ -367,7 +374,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.7 MB",
     "description": "Official SSC Board March 2023 Geometry paper with Basic Proportionality Theorem (BPT) proof, tangent segment theorem, and trigonometry height and distance problems.",
-    "blueprint": "Board pattern: Q1 to Q5 covering Similarity, Circle, Coordinate Geometry, Trigonometry, and Mensuration."
+    "blueprint": "Board pattern: Q1 to Q5 covering Similarity, Circle, Coordinate Geometry, Trigonometry, and Mensuration.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2023-SCI1",
@@ -384,7 +392,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.3 MB",
     "description": "SSC March 2023 Science 1 paper with solved numericals on electric power, Snell's law refraction, metallurgy reactions, and carbon compounds IUPAC naming.",
-    "blueprint": "Section A Objectives (10M), Scientific reasoning (10M), Short explanations (15M), 5M Big conceptual question."
+    "blueprint": "Section A Objectives (10M), Scientific reasoning (10M), Short explanations (15M), 5M Big conceptual question.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2023-SCI2",
@@ -401,7 +410,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.2 MB",
     "description": "SSC March 2023 Science 2 paper with heredity flowcharts, aerobic vs anaerobic cellular respiration diagrams, biodiversity hotspots, and social health case studies.",
-    "blueprint": "Official MSBSHSE pattern with diagram evaluation, definitions, and environmental applications."
+    "blueprint": "Official MSBSHSE pattern with diagram evaluation, definitions, and environmental applications.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2023-ENG",
@@ -418,7 +428,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "4.1 MB",
     "description": "SSC March 2023 English Kumarbharati paper with solved reading comprehension, poetry rhyme scheme & figures of speech analysis, formal letter, speech writing, and expansion of idea.",
-    "blueprint": "Full 80-mark Kumarbharati blueprint with marking criteria for content, fluency, and grammar accuracy."
+    "blueprint": "Full 80-mark Kumarbharati blueprint with marking criteria for content, fluency, and grammar accuracy.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2022-ALG",
@@ -435,7 +446,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "2.9 MB",
     "description": "Official Maharashtra SSC Board March 2022 Algebra paper with complete step-by-step solutions for Arithmetic Progression, Quadratic roots, and Probability sample space.",
-    "blueprint": "Standard MSBSHSE 40-mark paper pattern with complete answer explanations."
+    "blueprint": "Standard MSBSHSE 40-mark paper pattern with complete answer explanations.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2022-GEO",
@@ -452,7 +464,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.4 MB",
     "description": "Official SSC Board March 2022 Geometry question paper with solved angle bisector theorem, circle inscribed angles, tangent line construction, and distance formula applications.",
-    "blueprint": "Q1 to Q5 covering Similarity, Pythagoras, Circle, Coordinate Geometry, and Trigonometry."
+    "blueprint": "Q1 to Q5 covering Similarity, Pythagoras, Circle, Coordinate Geometry, and Trigonometry.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2022-SCI1",
@@ -469,7 +482,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.1 MB",
     "description": "SSC March 2022 Science 1 paper with gravitational potential energy derivations, Newlands law vs Mendeleev periodic law, convex lens ray diagrams, and rusting reactions.",
-    "blueprint": "40 Marks standard layout with conceptual derivations and scientific justifications."
+    "blueprint": "40 Marks standard layout with conceptual derivations and scientific justifications.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2022-SCI2",
@@ -486,7 +500,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.0 MB",
     "description": "SSC March 2022 Science 2 paper with embryological evidences of evolution, glycolysis cycle steps, thermal power generation eco-impacts, and solid waste segregation.",
-    "blueprint": "40 Marks MSBSHSE standard paper with step-by-step model marking."
+    "blueprint": "40 Marks MSBSHSE standard paper with step-by-step model marking.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2020-ALG",
@@ -503,7 +518,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "2.8 MB",
     "description": "Pre-pandemic official SSC Board March 2020 Algebra paper featuring complete syllabus questions: Financial Planning GST/shares, Mean-Median-Mode ogive graphs, and Cramer's rule.",
-    "blueprint": "Complete revised syllabus 40-mark paper pattern with model solution key."
+    "blueprint": "Complete revised syllabus 40-mark paper pattern with model solution key.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2020-GEO",
@@ -520,7 +536,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.3 MB",
     "description": "Official SSC Board March 2020 Geometry paper with complete solutions of Appollonius theorem, cyclic quadrilateral theorem, trigonometry identities, and frustum volume calculations.",
-    "blueprint": "Standard MSBSHSE 40-mark paper covering Similarity, Circle, Constructions, and Mensuration."
+    "blueprint": "Standard MSBSHSE 40-mark paper covering Similarity, Circle, Constructions, and Mensuration.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2020-SCI1",
@@ -537,7 +554,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.0 MB",
     "description": "Official SSC Board March 2020 Science 1 paper with Fleming's left hand rule, Joule's law heating calculations, dispersion of light, and escape velocity formulas.",
-    "blueprint": "Official MSBSHSE blueprint with numerical problem marking breakdowns."
+    "blueprint": "Official MSBSHSE blueprint with numerical problem marking breakdowns.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2020-SCI2",
@@ -554,7 +572,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "2.9 MB",
     "description": "Official SSC Board March 2020 Science 2 paper with menstrual cycle hormonal regulation, IVF process, bio-fertilizers, and disaster management mock drill guidelines.",
-    "blueprint": "Full 40-mark Biology & EVS board question paper with model answers."
+    "blueprint": "Full 40-mark Biology & EVS board question paper with model answers.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2019-ALG",
@@ -571,7 +590,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "2.7 MB",
     "description": "Historic inaugural year paper of the newly revised Maharashtra SSC 100-mark curriculum pattern with full solutions for Algebra.",
-    "blueprint": "Inaugural revised pattern: Activity based questions, HOTS, and internal choice questions."
+    "blueprint": "Inaugural revised pattern: Activity based questions, HOTS, and internal choice questions.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2019-GEO",
@@ -588,7 +608,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.2 MB",
     "description": "Inaugural revised curriculum March 2019 Geometry paper with theorems, tangent secant segment theorem, and geometric transformation proofs.",
-    "blueprint": "40 Marks official MSBSHSE question paper with model solution guide."
+    "blueprint": "40 Marks official MSBSHSE question paper with model solution guide.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2019-SCI1",
@@ -605,7 +626,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "2.9 MB",
     "description": "March 2019 Science 1 board paper testing modern periodic table trends, reflection/refraction laws, and chemical reaction types with model answer keys.",
-    "blueprint": "40 Marks standard layout with diagram explanations and unit conversions."
+    "blueprint": "40 Marks standard layout with diagram explanations and unit conversions.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-2019-SCI2",
@@ -622,7 +644,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "2.8 MB",
     "description": "March 2019 Science 2 board paper with cellular division, classification of chordates and non-chordates, green energy generation, and environmental acts in India.",
-    "blueprint": "40 Marks standard layout with flowchart completions and scientific definitions."
+    "blueprint": "40 Marks standard layout with flowchart completions and scientific definitions.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-SCERT-MTH",
@@ -639,7 +662,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "8.5 MB",
     "description": "Official Maharashtra State Council of Educational Research and Training (SCERT) question bank with objective, 2-mark, 3-mark, and 5-mark HOTS questions.",
-    "blueprint": "Comprehensive chapter-wise question pool prepared by State Board subject committee."
+    "blueprint": "Comprehensive chapter-wise question pool prepared by State Board subject committee.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-SCERT-SCI",
@@ -656,7 +680,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "9.1 MB",
     "description": "Official SCERT Science question bank with diagram-based questions, scientific reason pools, experimental setups, and application-based questions.",
-    "blueprint": "Official SCERT repository covering every chapter of Science 1 and Science 2."
+    "blueprint": "Official SCERT repository covering every chapter of Science 1 and Science 2.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-SSC-PRELIM-MTH",
@@ -673,7 +698,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.2 MB",
     "description": "Full-syllabus preliminary mock board examination paper designed strictly on the latest MSBSHSE pattern by Nikhillesh Sir with answer key and evaluation rubric.",
-    "blueprint": "Standard MSBSHSE blueprint simulating exact final board exam conditions."
+    "blueprint": "Standard MSBSHSE blueprint simulating exact final board exam conditions.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-2024-PHY",
@@ -690,7 +716,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "4.8 MB",
     "description": "Official Maharashtra HSC Board March 2024 Physics question paper with detailed step-by-step numerical calculations, circuit diagrams, and derivations prepared by Amit Sir.",
-    "blueprint": "Section A: 10 MCQs + 8 VSA (18M); Section B: 8 out of 12 SA-I (16M); Section C: 8 out of 12 SA-II (24M); Section D: 3 out of 5 LA (12M)."
+    "blueprint": "Section A: 10 MCQs + 8 VSA (18M); Section B: 8 out of 12 SA-I (16M); Section C: 8 out of 12 SA-II (24M); Section D: 3 out of 5 LA (12M).",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-2024-CHE",
@@ -707,7 +734,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "4.5 MB",
     "description": "Official Maharashtra HSC Board March 2024 Chemistry question paper covering Physical Chemistry numericals, Inorganic coordination compounds, and Organic conversion mechanisms.",
-    "blueprint": "Section A (18M), Section B (16M), Section C (24M), Section D (12M). Includes log table calculations."
+    "blueprint": "Section A (18M), Section B (16M), Section C (24M), Section D (12M). Includes log table calculations.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-2024-MTH",
@@ -724,7 +752,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "4.3 MB",
     "description": "Official Maharashtra HSC Board March 2024 Mathematics paper covering Mathematical Logic, Matrices, Trigonometric Functions, Pair of Straight Lines, Calculus, and Probability Distribution.",
-    "blueprint": "Section A: 8 MCQs (16M) + 4 VSA (4M); Section B: 8 of 12 (16M); Section C: 8 of 12 (24M); Section D: 5 of 8 (20M)."
+    "blueprint": "Section A: 8 MCQs (16M) + 4 VSA (4M); Section B: 8 of 12 (16M); Section C: 8 of 12 (24M); Section D: 5 of 8 (20M).",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-2024-BIO",
@@ -741,7 +770,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "4.7 MB",
     "description": "Official Maharashtra HSC Board March 2024 Biology paper with botany and zoology sections: Reproduction in Plants & Animals, Genetics, Human Physiology, and Biotechnology.",
-    "blueprint": "Section A (18M), Section B (16M), Section C (24M), Section D (12M) with neat labeled scientific sketches."
+    "blueprint": "Section A (18M), Section B (16M), Section C (24M), Section D (12M) with neat labeled scientific sketches.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-2023-PHY",
@@ -758,7 +788,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "4.2 MB",
     "description": "Maharashtra HSC Board March 2023 Physics paper covering Rotational Dynamics, Mechanical Properties of Fluids, Kinetic Theory of Gases, Thermodynamics, and Wave Optics.",
-    "blueprint": "Official MSBSHSE 70-mark pattern with complete worked-out numerical solutions."
+    "blueprint": "Official MSBSHSE 70-mark pattern with complete worked-out numerical solutions.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-2023-CHE",
@@ -775,7 +806,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.9 MB",
     "description": "Maharashtra HSC Board March 2023 Chemistry paper covering Solid State, Solutions, Chemical Thermodynamics, Electrochemistry, Chemical Kinetics, and Halogen Derivatives.",
-    "blueprint": "Official MSBSHSE 70-mark pattern with balanced chemical equations and reaction schemes."
+    "blueprint": "Official MSBSHSE 70-mark pattern with balanced chemical equations and reaction schemes.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-2023-MTH",
@@ -792,7 +824,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "4.0 MB",
     "description": "Maharashtra HSC Board March 2023 Mathematics paper with complete integration by parts derivations, differential equations modeling, vectors dot/cross product, and binomial distribution.",
-    "blueprint": "Full 80-mark standard paper covering Part 1 and Part 2 with step marking."
+    "blueprint": "Full 80-mark standard paper covering Part 1 and Part 2 with step marking.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-2023-BIO",
@@ -809,7 +842,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "4.4 MB",
     "description": "Maharashtra HSC Board March 2023 Biology paper covering double fertilization, DNA replication semi-conservative proof, cardiac cycle, and recombinant DNA technology.",
-    "blueprint": "70 Marks HSC layout with diagrams of floral parts, human brain, nephron, and plasmid vectors."
+    "blueprint": "70 Marks HSC layout with diagrams of floral parts, human brain, nephron, and plasmid vectors.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-2022-PHY",
@@ -826,7 +860,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "4.1 MB",
     "description": "Maharashtra HSC Board March 2022 Physics paper with solved derivations of conical pendulum, surface tension capillary rise, Carnot engine, and de Broglie wavelength.",
-    "blueprint": "Standard MSBSHSE 70-mark pattern with complete answer explanations."
+    "blueprint": "Standard MSBSHSE 70-mark pattern with complete answer explanations.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-2022-CHE",
@@ -843,7 +878,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.8 MB",
     "description": "Maharashtra HSC Board March 2022 Chemistry paper with solved ionic equilibria buffer solutions, Kohlrausch law, d-block magnetic properties, and Aldol condensation.",
-    "blueprint": "70 Marks standard layout with step-by-step model marking."
+    "blueprint": "70 Marks standard layout with step-by-step model marking.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-2022-MTH",
@@ -860,7 +896,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.9 MB",
     "description": "Maharashtra HSC Board March 2022 Mathematics paper with complete solutions of truth tables, inverse matrix adjoint method, definite integrals properties, and linear programming (LPP).",
-    "blueprint": "Full 80-mark standard paper covering Part 1 and Part 2 with step marking."
+    "blueprint": "Full 80-mark standard paper covering Part 1 and Part 2 with step marking.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-2022-BIO",
@@ -877,7 +914,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "4.3 MB",
     "description": "Maharashtra HSC Board March 2022 Biology paper covering gametogenesis, transcription & translation, reflex arc, and ecosystem ecological pyramids with model diagrams.",
-    "blueprint": "70 Marks HSC layout with diagram marking breakdowns."
+    "blueprint": "70 Marks HSC layout with diagram marking breakdowns.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-2020-PHY",
@@ -894,7 +932,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.9 MB",
     "description": "Official Maharashtra HSC Board March 2020 Physics question paper with detailed derivations of angular momentum conservation, Kirchhoff laws, resonance in AC circuits, and photoelectric effect.",
-    "blueprint": "MSBSHSE 70-mark pattern with complete answer explanations."
+    "blueprint": "MSBSHSE 70-mark pattern with complete answer explanations.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-2020-CHE",
@@ -911,7 +950,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.7 MB",
     "description": "Official Maharashtra HSC Board March 2020 Chemistry paper with Nernst equation calculations, order of reaction derivations, coordination isomerism, and carbohydrates structures.",
-    "blueprint": "MSBSHSE 70-mark pattern with chemical equations and step marking."
+    "blueprint": "MSBSHSE 70-mark pattern with chemical equations and step marking.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-2020-MTH",
@@ -928,7 +968,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.8 MB",
     "description": "Official Maharashtra HSC Board March 2020 Mathematics paper covering derivatives of parametric functions, shortest distance between skew lines, planes in 3D, and Poisson distribution.",
-    "blueprint": "Full 80-mark standard paper covering Part 1 and Part 2 with step marking."
+    "blueprint": "Full 80-mark standard paper covering Part 1 and Part 2 with step marking.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-2019-PHY",
@@ -945,7 +986,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.8 MB",
     "description": "Official Maharashtra HSC Board March 2019 Physics paper with circular motion acceleration, Bernoulli equation, stationary waves on stretched strings, and Bohr atom model postulates.",
-    "blueprint": "MSBSHSE 70-mark pattern with complete answer explanations."
+    "blueprint": "MSBSHSE 70-mark pattern with complete answer explanations.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-2019-CHE",
@@ -962,7 +1004,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.6 MB",
     "description": "Official Maharashtra HSC Board March 2019 Chemistry paper covering Raoult's law, half life of first order reactions, lanthanoid contraction, and polymer classifications.",
-    "blueprint": "MSBSHSE 70-mark pattern with chemical equations and step marking."
+    "blueprint": "MSBSHSE 70-mark pattern with chemical equations and step marking.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-2019-MTH",
@@ -979,7 +1022,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.7 MB",
     "description": "Official Maharashtra HSC Board March 2019 Mathematics paper covering Rolle's Theorem, angle between planes, differential equations integrating factor, and continuous random variables.",
-    "blueprint": "Full 80-mark standard paper covering Part 1 and Part 2 with step marking."
+    "blueprint": "Full 80-mark standard paper covering Part 1 and Part 2 with step marking.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-SCERT-PC",
@@ -996,7 +1040,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "10.4 MB",
     "description": "Complete official SCERT question bank for Class 12 Science stream with chapter-wise numericals, conceptual questions, derivations, and board sample solutions.",
-    "blueprint": "Comprehensive chapter-wise question pool prepared by State Board subject committee."
+    "blueprint": "Comprehensive chapter-wise question pool prepared by State Board subject committee.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-HSC-SCERT-MTH",
@@ -1013,7 +1058,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "9.8 MB",
     "description": "Official SCERT Mathematics question bank with chapter-wise questions: Logic, Matrices, Trigonometry, Vectors, Differential Calculus, Integration, and Probability.",
-    "blueprint": "Official SCERT repository covering every chapter of Class 12 Mathematics & Statistics."
+    "blueprint": "Official SCERT repository covering every chapter of Class 12 Mathematics & Statistics.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-09-ANNUAL-ALG",
@@ -1030,7 +1076,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "2.6 MB",
     "description": "Comprehensive annual exam model paper based on Maharashtra State Board syllabus: Sets, Real Numbers, Polynomials, Ratio & Proportion, Linear Equations in Two Variables, and Financial Planning.",
-    "blueprint": "Maharashtra State Board Class 9 standard 40-mark annual evaluation pattern."
+    "blueprint": "Maharashtra State Board Class 9 standard 40-mark annual evaluation pattern.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-09-ANNUAL-GEO",
@@ -1047,7 +1094,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "2.8 MB",
     "description": "Comprehensive annual exam model paper for Geometry: Basic Concepts in Geometry, Parallel Lines, Triangles, Quadrilaterals, Circle, Coordinate Geometry, Trigonometry, and Surface Area & Volume.",
-    "blueprint": "Maharashtra State Board Class 9 standard 40-mark annual evaluation pattern."
+    "blueprint": "Maharashtra State Board Class 9 standard 40-mark annual evaluation pattern.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-09-ANNUAL-MTH",
@@ -1064,7 +1112,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "3.4 MB",
     "description": "Complete 80-mark combined annual examination paper covering both Algebra and Geometry with detailed answer sheets and step-by-step solutions by Nikhillesh Sir.",
-    "blueprint": "Summative Evaluation 80-mark pattern used across top Maharashtra schools."
+    "blueprint": "Summative Evaluation 80-mark pattern used across top Maharashtra schools.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-09-ANNUAL-SCI1",
@@ -1081,7 +1130,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "2.7 MB",
     "description": "Class 9 Science 1 annual model paper covering Laws of Motion, Work and Energy, Current Electricity, Measurement of Matter, Acids Bases & Salts, and Carbon Compounds.",
-    "blueprint": "MSBSHSE Class 9 Science 1 pattern with numericals, definitions, and experimental setups."
+    "blueprint": "MSBSHSE Class 9 Science 1 pattern with numericals, definitions, and experimental setups.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-09-ANNUAL-SCI2",
@@ -1098,7 +1148,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "2.7 MB",
     "description": "Class 9 Science 2 annual model paper covering Classification of Plants, Energy Flow in an Ecosystem, Useful and Harmful Microbes, Environmental Management, and Information Technology.",
-    "blueprint": "MSBSHSE Class 9 Science 2 pattern with labeled diagrams and biological processes."
+    "blueprint": "MSBSHSE Class 9 Science 2 pattern with labeled diagrams and biological processes.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-09-TERM1-MS",
@@ -1115,7 +1166,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "2.4 MB",
     "description": "Mid-term semester 1 evaluation test covering Sets, Polynomials, Parallel Lines, Laws of Motion, and Plant Classification with model answer key.",
-    "blueprint": "50 Marks semester evaluation pattern with balanced objective and subjective sections."
+    "blueprint": "50 Marks semester evaluation pattern with balanced objective and subjective sections.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-09-SCERT-BANK",
@@ -1132,7 +1184,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "7.3 MB",
     "description": "Official SCERT practice questions and Balbharati exercises for Class 9 students preparing for annual school examinations.",
-    "blueprint": "Chapter-wise practice problem sets and solutions."
+    "blueprint": "Chapter-wise practice problem sets and solutions.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-08-ANNUAL-MTH",
@@ -1149,7 +1202,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "2.2 MB",
     "description": "Summative Assessment II (Annual Exam) model paper covering Rational Numbers, Parallel Lines & Transversal, Indices, Expansion Formulas, Factorisation of Algebraic Expressions, and Circles.",
-    "blueprint": "Summative Assessment II standard 50-mark pattern according to Continuous Comprehensive Evaluation (CCE)."
+    "blueprint": "Summative Assessment II standard 50-mark pattern according to Continuous Comprehensive Evaluation (CCE).",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-08-ANNUAL-SCI",
@@ -1166,7 +1220,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "2.3 MB",
     "description": "Summative Assessment II (Annual Exam) General Science model paper: Living World & Classification of Microbes, Inside the Atom, Current Electricity, Chemical Change, and Measurement & Effects of Heat.",
-    "blueprint": "Summative Assessment II standard 50-mark pattern according to Continuous Comprehensive Evaluation (CCE)."
+    "blueprint": "Summative Assessment II standard 50-mark pattern according to Continuous Comprehensive Evaluation (CCE).",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-08-TERM1-MTH",
@@ -1183,7 +1238,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "2.0 MB",
     "description": "First semester evaluation paper covering Chapters 1 to 8: Rational & Irrational Numbers, Parallel Lines, Indices & Cube Root, Altitudes & Medians of a Triangle, and Expansion Formulas.",
-    "blueprint": "Term 1 Summative Assessment (50 Marks) with step-by-step marking guide."
+    "blueprint": "Term 1 Summative Assessment (50 Marks) with step-by-step marking guide.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-08-TERM1-SCI",
@@ -1200,7 +1256,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "2.1 MB",
     "description": "First semester evaluation paper covering Health & Diseases, Force & Pressure, Current Electricity & Magnetism, Inside the Atom, and Composition of Matter with model diagrams.",
-    "blueprint": "Term 1 Summative Assessment (50 Marks) with model answer key."
+    "blueprint": "Term 1 Summative Assessment (50 Marks) with model answer key.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-08-UNITTEST-SET",
@@ -1217,7 +1274,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "1.8 MB",
     "description": "Periodic unit test practice sets for Class 8 students with model solution sheets for rapid chapter-wise assessment and conceptual reinforcement.",
-    "blueprint": "Formative evaluation unit test papers (25 marks each) with teacher marking rubrics."
+    "blueprint": "Formative evaluation unit test papers (25 marks each) with teacher marking rubrics.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-08-BALBHARATI",
@@ -1234,7 +1292,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "5.5 MB",
     "description": "Comprehensive textbook exercise question bank and chapter summaries with solved numerical problems and diagrams for Class 8.",
-    "blueprint": "Balbharati chapter-wise practice set for Maharashtra State Board."
+    "blueprint": "Balbharati chapter-wise practice set for Maharashtra State Board.",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-STK01",
@@ -1251,7 +1310,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "2.8 MB",
     "description": "Practical chart analysis case study paper testing Candlestick identification, trendlines, RSI indicators, moving averages crossover, and portfolio risk management.",
-    "blueprint": "50 Marks practical exam: Chart identification (20M), Indicator analysis (15M), Risk-reward strategy case study (15M)."
+    "blueprint": "50 Marks practical exam: Chart identification (20M), Indicator analysis (15M), Risk-reward strategy case study (15M).",
+    "enrollmentRequired": true
   },
   {
     "id": "PAPER-AI01",
@@ -1268,7 +1328,8 @@ const DEFAULT_PAPERS = [
     "solutionAvailable": true,
     "solutionSize": "2.5 MB",
     "description": "Practical evaluation paper on prompt engineering benchmarks, LLM workflow automation, multimodal generation tasks, and AI ethical guidelines.",
-    "blueprint": "50 Marks practical exam: Prompt engineering challenges (20M), Workflow design (15M), Real-world automation use case (15M)."
+    "blueprint": "50 Marks practical exam: Prompt engineering challenges (20M), Workflow design (15M), Real-world automation use case (15M).",
+    "enrollmentRequired": true
   }
 ];
 

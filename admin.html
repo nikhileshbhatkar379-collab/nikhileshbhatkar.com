@@ -885,6 +885,26 @@
           <label for="modalPaperDesc">Description &amp; Key Topics Included <span class="required">*</span></label>
           <textarea id="modalPaperDesc" rows="3" placeholder="Official board examination question paper with worked-out solutions and marking scheme..." required></textarea>
         </div>
+
+        <!-- Enrollment & Access Control -->
+        <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;padding:1rem;margin:1rem 0;">
+          <h4 style="margin-top:0;color:#0369a1;">🔐 Access Control Settings</h4>
+          <div class="form-group">
+            <label style="display:flex;align-items:center;cursor:pointer;">
+              <input type="checkbox" id="modalPaperEnrollmentRequired" style="margin-right:0.5rem;" checked>
+              <span>This paper requires student enrollment (restrict to logged-in students only)</span>
+            </label>
+            <small style="color:#64748b;">Unchecked: Paper is visible to everyone without login</small>
+          </div>
+          <div class="form-group">
+            <label style="display:flex;align-items:center;cursor:pointer;">
+              <input type="checkbox" id="modalPaperIsSample" style="margin-right:0.5rem;">
+              <span>Mark as <strong>Sample Paper</strong> (Free preview for non-enrolled students)</span>
+            </label>
+            <small style="color:#64748b;">Only ONE sample paper will be visible to non-enrolled visitors</small>
+          </div>
+        </div>
+
         <div class="modal-actions">
           <button type="submit" class="btn-primary">🚀 Publish Question Paper</button>
           <button type="button" class="btn-secondary" onclick="closePaperModal()">Cancel</button>
@@ -1179,6 +1199,7 @@
   <!-- Scripts -->
   <script src="auth.js"></script>
   <script src="i18n.js"></script>
+  <script src="script.js"></script>
   <script src="admin.js"></script>
 </body>
 </html>

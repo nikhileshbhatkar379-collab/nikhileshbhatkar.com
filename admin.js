@@ -438,6 +438,16 @@ function renderPapersTable() {
     if (p.type === 'SCERT Question Bank') typeBadge = 'badge-bank';
     if (p.type === 'Model Paper') typeBadge = 'badge-model';
 
+    // Enrollment badge
+    let accessBadge = '';
+    if (p.isSamplePaper) {
+      accessBadge = '<span class="badge" style="background:#dcfce7;color:#166534;margin-top:4px;display:inline-block;">🌟 Free Sample</span>';
+    } else if (p.enrollmentRequired) {
+      accessBadge = '<span class="badge" style="background:#fee2e2;color:#991b1b;margin-top:4px;display:inline-block;">🔒 Enrolled Only</span>';
+    } else {
+      accessBadge = '<span class="badge badge-regular" style="margin-top:4px;display:inline-block;">🌐 Public</span>';
+    }
+
     return `
       <tr>
         <td><strong>${p.title}</strong><br><small style="color:var(--text-muted);">${p.subject}</small></td>
@@ -447,7 +457,8 @@ function renderPapersTable() {
         <td>${p.marks || '40 Marks'}</td>
         <td>
           <span class="badge badge-category">📄 ${p.fileType || 'PDF'}</span><br>
-          <span class="badge ${p.solutionAvailable ? 'badge-paid' : 'badge-regular'}" style="margin-top:4px;display:inline-block;">${p.solutionAvailable ? '🔑 Key Attached' : '⏳ Solution Pending'}</span>
+          <span class="badge ${p.solutionAvailable ? 'badge-paid' : 'badge-regular'}" style="margin-top:4px;display:inline-block;">${p.solutionAvailable ? '🔑 Key Attached' : '⏳ Solution Pending'}</span><br>
+          ${accessBadge}
         </td>
         <td>
           <div class="action-buttons">
@@ -2144,7 +2155,9 @@ function setupEventListeners() {
         solutionSize: formattedSolSize,
         downloadUrl: externalUrl || '#',
         solutionUrl: solutionUrl || '#',
-        description: document.getElementById('modalPaperDesc').value.trim()
+        description: document.getElementById('modalPaperDesc').value.trim(),
+        enrollmentRequired: document.getElementById('modalPaperEnrollmentRequired').checked,
+        isSamplePaper: document.getElementById('modalPaperIsSample').checked
       });
 
       AcademyDB.savePapers(papers);
