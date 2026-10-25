@@ -199,14 +199,16 @@
           // Standard filter
           const matchStandard = (currentStandard === 'all') || (item.standard === currentStandard);
 
-          // Type filter
-          let matchType = true;
-          if (currentType === 'notes') {
-            matchType = item.itemCategory === 'note';
-          } else if (currentType === 'papers') {
-            matchType = item.itemCategory === 'paper' && item.type === 'Board PYQ';
-          } else if (currentType === 'banks') {
-            matchType = item.type === 'SCERT Question Bank' || item.type === 'Model Paper';
+          // Type filter - when 'all' is selected, show everything
+          let matchType = (currentType === 'all');
+          if (!matchType) {
+            if (currentType === 'notes') {
+              matchType = item.itemCategory === 'note';
+            } else if (currentType === 'papers') {
+              matchType = item.itemCategory === 'paper' && item.type === 'Board PYQ';
+            } else if (currentType === 'banks') {
+              matchType = item.type === 'SCERT Question Bank' || item.type === 'Model Paper';
+            }
           }
 
           // Year / Session filter

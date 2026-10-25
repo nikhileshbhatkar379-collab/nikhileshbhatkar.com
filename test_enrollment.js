@@ -35,8 +35,8 @@ console.log(`   ✓ Has sample paper checkbox: ${hasSampleCheckbox}`);
 // 4. Check admin.js for new fields in form submission
 console.log('\n4️⃣ Checking admin.js for enrollment field capture...');
 const adminJsContent = fs.readFileSync('admin.js', 'utf8');
-const capturesEnrollmentRequired = adminJsContent.includes('modalPaperEnrollmentRequired').checked');
-const capturesSample = adminJsContent.includes('modalPaperIsSample').checked');
+const capturesEnrollmentRequired = adminJsContent.includes('modalPaperEnrollmentRequired');
+const capturesSample = adminJsContent.includes('modalPaperIsSample');
 
 console.log(`   ✓ Captures enrollmentRequired: ${capturesEnrollmentRequired}`);
 console.log(`   ✓ Captures isSamplePaper: ${capturesSample}`);

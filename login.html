@@ -162,8 +162,8 @@
       tabStudent.addEventListener('click', () => switchTab('student'));
       tabAdmin.addEventListener('click', () => switchTab('admin'));
 
-      // Quick Fill Buttons
-      document.getElementById('fillAdminDemo').addEventListener('click', () => {
+      // Quick Fill Buttons (safely check if elements exist)
+      document.getElementById('fillAdminDemo')?.addEventListener('click', () => {
         switchTab('admin');
         document.getElementById('adminUsername').value = 'admin';
         document.getElementById('adminPassword').value = 'admin123';
@@ -175,7 +175,7 @@
         document.getElementById('adminPassword').value = 'amit123';
       });
 
-      document.getElementById('fillStudentDemo').addEventListener('click', () => {
+      document.getElementById('fillStudentDemo')?.addEventListener('click', () => {
         switchTab('student');
         document.getElementById('studentId').value = 'STU-1001';
         document.getElementById('studentPin').value = 'student123';

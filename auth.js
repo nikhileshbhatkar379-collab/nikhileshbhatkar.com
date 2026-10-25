@@ -1843,7 +1843,16 @@ const AcademyDB = {
   getAdmin: () => JSON.parse(localStorage.getItem('academy_admin') || JSON.stringify(DEFAULT_ADMIN)),
   saveAdmin: (admin) => localStorage.setItem('academy_admin', JSON.stringify(admin)),
 
-  getStudents: () => JSON.parse(localStorage.getItem('academy_students') || '[]'),
+  getStudents: () => {
+    try {
+      const stored = localStorage.getItem('academy_students');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return DEFAULT_STUDENTS;
+  },
   saveStudents: (students) => localStorage.setItem('academy_students', JSON.stringify(students)),
 
   getNotes: () => JSON.parse(localStorage.getItem('academy_notes') || '[]'),
@@ -1927,7 +1936,9 @@ const Auth = {
         username: matchedAdmin.username,
         loginTime: new Date().toISOString()
       };
-      sessionStorage.setItem('academy_session', JSON.stringify(session));
+      const sessionStr = JSON.stringify(session);
+      try { localStorage.setItem('academy_session', sessionStr); } catch (e) {}
+      try { sessionStorage.setItem('academy_session', sessionStr); } catch (e) {}
       return { success: true, user: session };
     }
     return { success: false, message: 'Invalid Admin username, email, or password.' };
@@ -1939,9 +1950,12 @@ const Auth = {
     const cleanId = (studentIdOrPhone || '').trim().toLowerCase();
     const cleanPin = (pin || '').trim();
 
-    const student = students.find(s =>
-      (s.id.toLowerCase() === cleanId || s.phone === cleanId) && s.pin === cleanPin
-    );
+    const student = students.find(s => {
+      const idMatch = (s.id || '').trim().toLowerCase() === cleanId;
+      const phoneMatch = (s.phone || '').trim().toLowerCase() === cleanId;
+      const pinMatch = (s.pin || '').trim() === cleanPin;
+      return (idMatch || phoneMatch) && pinMatch;
+    });
 
     if (student) {
       const session = {
@@ -1954,7 +1968,9 @@ const Auth = {
         feeStatus: student.feeStatus,
         loginTime: new Date().toISOString()
       };
-      sessionStorage.setItem('academy_session', JSON.stringify(session));
+      const sessionStr = JSON.stringify(session);
+      try { localStorage.setItem('academy_session', sessionStr); } catch (e) {}
+      try { sessionStorage.setItem('academy_session', sessionStr); } catch (e) {}
       return { success: true, user: session };
     }
     return { success: false, message: 'Invalid Student ID / Phone or PIN password.' };
@@ -1962,7 +1978,11 @@ const Auth = {
 
   // Get current logged-in session
   getCurrentUser: () => {
-    const raw = sessionStorage.getItem('academy_session');
+    let raw = null;
+    try { raw = localStorage.getItem('academy_session'); } catch (e) {}
+    if (!raw) {
+      try { raw = sessionStorage.getItem('academy_session'); } catch (e) {}
+    }
     if (!raw) return null;
     try {
       return JSON.parse(raw);
@@ -1973,7 +1993,8 @@ const Auth = {
 
   // Logout current session
   logout: () => {
-    sessionStorage.removeItem('academy_session');
+    try { localStorage.removeItem('academy_session'); } catch (e) {}
+    try { sessionStorage.removeItem('academy_session'); } catch (e) {}
     window.location.href = 'login.html';
   },
 
@@ -1981,7 +2002,7 @@ const Auth = {
   requireAuth: (requiredRole) => {
     const user = Auth.getCurrentUser();
     if (!user) {
-      window.location.href = `login.html?redirect=${encodeURIComponent(window.location.pathname)}`;
+      window.location.href = 'login.html';
       return null;
     }
     if (requiredRole && user.role !== requiredRole) {
@@ -1995,6 +2016,12 @@ const Auth = {
     return user;
   }
 };
+
+// Ensure globally accessible on window
+if (typeof window !== 'undefined') {
+  window.Auth = Auth;
+  window.AcademyDB = AcademyDB;
+}
 
 // Global Document Download & File Generation Utility
 window.downloadDocumentFile = function(item, fallbackTitle, docType) {
