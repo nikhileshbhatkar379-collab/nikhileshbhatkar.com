@@ -2315,25 +2315,45 @@ function setupEventListeners() {
   }
 
   // Publish Hall of Fame to the public website.
-  // Downloads data/hall-of-fame.json so the admin can commit & push it —
-  // localStorage edits alone never reach other visitors.
+  // Downloads hall-of-fame.json so the admin can commit & push it —
+  // localStorage edits alone never reach other visitors on static GitHub Pages.
+  function getToppersPayload() {
+    const toppers = AcademyDB.getToppers() || [];
+    return {
+      version: 1,
+      updated: new Date().toISOString().split('T')[0],
+      toppers
+    };
+  }
+
   document.getElementById('publishToppersBtn')?.addEventListener('click', () => {
     const toppers = AcademyDB.getToppers() || [];
     if (toppers.length === 0) {
       alert('No toppers to publish. Add at least one first.');
       return;
     }
-    const payload = {
-      version: 1,
-      updated: new Date().toISOString().split('T')[0],
-      toppers
-    };
-    downloadFile(
-      JSON.stringify(payload, null, 2),
-      'data/hall-of-fame.json',
-      'application/json'
-    );
-    alert('✅ Downloaded data/hall-of-fame.json.\n\nReplace the file in your repo and commit + push to make these toppers live on the public site.');
+    const payload = getToppersPayload();
+    const jsonStr = JSON.stringify(payload, null, 2);
+    downloadFile(jsonStr, 'hall-of-fame.json', 'application/json');
+
+    const modal = document.getElementById('publishToppersModal');
+    if (modal) {
+      modal.style.display = 'flex';
+    } else {
+      alert('✅ Downloaded hall-of-fame.json!\n\nTo make these toppers live on the public site, place it in data/ and push to GitHub.');
+    }
+  });
+
+  document.getElementById('copyToppersJsonBtn')?.addEventListener('click', () => {
+    const payload = getToppersPayload();
+    navigator.clipboard?.writeText(JSON.stringify(payload, null, 2))
+      .then(() => alert('📋 Hall of Fame JSON copied to clipboard!'))
+      .catch(() => alert('Could not copy automatically. You can use the downloaded file.'));
+  });
+
+  document.getElementById('redownloadToppersBtn')?.addEventListener('click', () => {
+    const payload = getToppersPayload();
+    downloadFile(JSON.stringify(payload, null, 2), 'hall-of-fame.json', 'application/json');
   });
 
   // Doubt Reply Form Submission

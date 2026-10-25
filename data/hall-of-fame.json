@@ -1,46 +1,58 @@
 {
   "version": 1,
-  "updated": "2026-10-23",
+  "updated": "2026-10-25",
   "toppers": [
     {
-      "name": "Sayali Sawant",
-      "score": "96.4%",
-      "exam": "SSC Board Exam",
-      "year": "2025",
-      "school": "Sangameshwar High School",
-      "subjects": "Maths: 100/100 • Science: 98/100",
-      "quote": "Nikhillesh Sir's chapter-wise preliminary tests and formula notes gave me the confidence to score 100 in Mathematics!",
-      "badge": "🏆 Academy Rank 1"
+      "name": "Veda Chichkar",
+      "score": "80.17%",
+      "exam": "HSC Board",
+      "year": "2026",
+      "school": "",
+      "subjects": "Maths: 91/100",
+      "quote": "Nikhilesh Bhatkar Sir यांनी प्रत्येक संकल्पना सोप्या पद्धतीने समजावून सांगितली. नियमित सराव, महत्त्वाच्या प्रश्नांची तयारी आणि Sir यांच्या मार्गदर्शनामुळे मला हा उत्कृष्ट निकाल मिळवता आला.\n\nSir यांनी दिलेल्या वैयक्तिक मार्गदर्शनाबद्दल आणि सतत प्रोत्साहनाबद्दल मनापासून धन्यवाद!",
+      "badge": "🏆 Academy Star Merit",
+      "photo": "images/toppers/veda-chichkar.jpg",
+      "photoName": "veda-chichkar.jpg",
+      "photoType": "JPG"
     },
     {
-      "name": "Aditya Kadam",
-      "score": "95.2%",
-      "exam": "SSC Board Exam",
-      "year": "2025",
-      "school": "Ninavi Secondary School",
-      "subjects": "Maths: 98/100 • Science: 96/100",
-      "quote": "The small batch size and individual doubt sessions helped clear all tricky Geometry and Physics concepts.",
-      "badge": "🥇 Gold Merit"
+      "name": "Shatakshi Khatu",
+      "score": "89.44%",
+      "exam": "08 Standard",
+      "year": "2026",
+      "school": "",
+      "subjects": "Science: 58/60 • Maths: 56/60",
+      "quote": "I feel proud to have scored 56/60 in Mathematics and 58/60 in Science! 🏆\n\nJoining Nikhilesh Bhatkar Learning Academy was a great decision. Sir's teaching style is simple, interesting, and easy to understand. He gives special attention to every student and ensures that our doubts are cleared properly.\n\nRegular tests, question-solving practice, and valuable exam tips helped me prepare confidently for my examinations. The supportive learning environment motivated me to give my best in both subjects.\n\n🙏 Thank you, Sir, for helping me improve my knowledge and achieve such wonderful results!",
+      "badge": "🏆 Academy Star Merit",
+      "photo": "images/toppers/shatakshi-khatu.jpg",
+      "photoName": "shatakshi-khatu.jpg",
+      "photoType": "JPG"
     },
     {
-      "name": "Prathamesh Shirke",
-      "score": "93.8%",
-      "exam": "HSC Science Board Exam",
-      "year": "2025",
-      "school": "Sangameshwar Junior College",
-      "subjects": "Physics: 95/100 • Chemistry: 94/100",
-      "quote": "Amit Pawaskar Sir's numerical problem-solving sessions made HSC Physics intuitive and scoring.",
-      "badge": "⭐ HSC Distinction"
+      "name": "Shivam Gurav",
+      "score": "85.40%",
+      "exam": "SSC Board",
+      "year": "2026",
+      "school": "",
+      "subjects": "Maths: 83/100",
+      "quote": "Scoring 83 marks in Mathematics was a proud moment for me! 🎉\n\nThe teaching at Nikhilesh Bhatkar Learning Academy helped me understand difficult concepts easily. Sir explained every topic clearly, solved problems step by step, and guided us with regular practice and exam-oriented preparation.\n\nThe personal attention and constant motivation helped me improve my confidence and perform better in the HSC Board Examination.\n\n🙏 Thank you, Nikhilesh Bhatkar Sir, for your valuable guidance and support!",
+      "badge": "🏆 Academy Star Merit",
+      "photo": "images/toppers/shivam-gurav.jpg",
+      "photoName": "shivam-gurav.jpg",
+      "photoType": "JPG"
     },
     {
-      "name": "Riddhi Kulkarni",
-      "score": "94.6%",
-      "exam": "SSC Board Exam",
-      "year": "2024",
-      "school": "Navnirman Vidyalaya",
-      "subjects": "Maths: 99/100 • Science: 95/100",
-      "quote": "Regular Sunday mock board tests eliminated exam anxiety completely. Best coaching in Sangameshwar!",
-      "badge": "🏆 SSC Star Performer"
+      "name": "Yuga Kolvankar",
+      "score": "93.33%",
+      "exam": "09 Standard",
+      "year": "2026",
+      "school": "",
+      "subjects": "Maths: 97/100 • Science: 95/100",
+      "quote": "I'm extremely happy to have scored 97 marks in Mathematics and 95 marks in Science! 💯🏆\n\nMy journey at Nikhilesh Bhatkar Learning Academy has been a wonderful learning experience. Nikhilesh Bhatkar Sir explained every concept in a simple and easy-to-understand way. Regular practice, personal guidance, doubt-solving sessions, and exam-oriented preparation helped me achieve these excellent marks.\n\nSir's teaching methods made difficult topics easier and boosted my confidence to perform well in the board examination.\n\n🙏 A heartfelt thank you to Nikhilesh Bhatkar Sir for his continuous support, motivation, and guidance!",
+      "badge": "🏆 Academy Star Merit",
+      "photo": "images/toppers/yuga-kolvankar.jpg",
+      "photoName": "yuga-kolvankar.jpg",
+      "photoType": "JPG"
     }
   ]
 }
