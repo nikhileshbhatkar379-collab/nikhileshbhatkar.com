@@ -2502,7 +2502,40 @@ function setupEventListeners() {
     });
   }
 
-  // Export CSV Buttons
+  // Import & Export CSV Buttons
+  const importCsvBtn = document.getElementById('importStudentsCsvBtn');
+  const importCsvInput = document.getElementById('importStudentsCsvInput');
+
+  importCsvBtn?.addEventListener('click', () => {
+    importCsvInput?.click();
+  });
+
+  importCsvInput?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const text = evt.target?.result;
+        if (typeof text !== 'string' || !text.trim()) {
+          alert('⚠️ The selected CSV file is empty.');
+          return;
+        }
+        importStudentsFromCSV(text);
+      } catch (err) {
+        alert('❌ Error parsing CSV file: ' + (err.message || 'Unknown error'));
+      } finally {
+        importCsvInput.value = '';
+      }
+    };
+    reader.onerror = () => {
+      alert('❌ Error reading file. Please try again.');
+      importCsvInput.value = '';
+    };
+    reader.readAsText(file);
+  });
+
   document.getElementById('exportStudentsCsvBtn')?.addEventListener('click', () => {
     const students = AcademyDB.getStudents();
     let csv = 'Student ID,Name,Standard,Phone,PIN,Parent Name,Parent Phone,Fee Status,Enrolled Date\n';
@@ -2605,4 +2638,172 @@ function downloadFile(content, fileName, mimeType) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+// -------------------------------------------------------------
+// CSV Parser & Student Import
+// -------------------------------------------------------------
+function parseCSV(text) {
+  const lines = [];
+  let currentRow = [];
+  let currentField = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    const next = text[i + 1];
+
+    if (c === '"') {
+      if (inQuotes && next === '"') {
+        currentField += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (c === ',' && !inQuotes) {
+      currentRow.push(currentField.trim());
+      currentField = '';
+    } else if ((c === '\r' || c === '\n') && !inQuotes) {
+      if (c === '\r' && next === '\n') i++;
+      currentRow.push(currentField.trim());
+      currentField = '';
+      if (currentRow.length > 0 && currentRow.some(f => f.length > 0)) {
+        lines.push(currentRow);
+      }
+      currentRow = [];
+    } else {
+      currentField += c;
+    }
+  }
+  if (currentField || currentRow.length > 0) {
+    currentRow.push(currentField.trim());
+    if (currentRow.some(f => f.length > 0)) lines.push(currentRow);
+  }
+  return lines;
+}
+
+function normalizeStandard(str) {
+  const s = (str || '').trim();
+  const lower = s.toLowerCase();
+  if (lower.includes('10') || lower.includes('ssc')) return 'Standard 10 (SSC)';
+  if (lower.includes('12') || lower.includes('hsc')) return 'Standard 12 (HSC)';
+  if (lower === '8' || lower.includes('8th') || lower.includes('standard 8')) return 'Standard 8';
+  if (lower === '9' || lower.includes('9th') || lower.includes('standard 9')) return 'Standard 9';
+  if (lower.includes('ai') || lower.includes('stock')) return 'Special: AI & Stock Market';
+  return s || 'Standard 10 (SSC)';
+}
+
+function importStudentsFromCSV(csvText) {
+  const rows = parseCSV(csvText);
+  if (rows.length === 0) {
+    alert('The CSV file is empty.');
+    return;
+  }
+
+  // Detect header row
+  const headerRow = rows[0].map(h => (h || '').toLowerCase().replace(/[^a-z0-9]/g, ''));
+  let idCol = headerRow.findIndex(h => h.includes('studentid') || h === 'id' || h.includes('roll'));
+  let nameCol = headerRow.findIndex(h => h.includes('name') && !h.includes('parent'));
+  let standardCol = headerRow.findIndex(h => h.includes('standard') || h.includes('grade') || h.includes('class'));
+  let phoneCol = headerRow.findIndex(h => (h.includes('phone') || h.includes('mobile') || h.includes('contact')) && !h.includes('parent'));
+  let pinCol = headerRow.findIndex(h => h.includes('pin') || h.includes('pass') || h.includes('pwd'));
+  let parentNameCol = headerRow.findIndex(h => h.includes('parentname') || h.includes('fathername') || h === 'parent');
+  let parentPhoneCol = headerRow.findIndex(h => h.includes('parentphone') || h.includes('parentmobile') || h.includes('fatherphone'));
+  let feeStatusCol = headerRow.findIndex(h => h.includes('fee') || h.includes('payment') || h === 'status');
+  let enrolledDateCol = headerRow.findIndex(h => h.includes('enroll') || h.includes('admission') || h.includes('date'));
+
+  let startIndex = 1;
+  // If no header row detected, assume standard export order:
+  // 0: ID, 1: Name, 2: Standard, 3: Phone, 4: PIN, 5: Parent Name, 6: Parent Phone, 7: Fee Status, 8: Enrolled Date
+  if (nameCol === -1) {
+    idCol = 0;
+    nameCol = 1;
+    standardCol = 2;
+    phoneCol = 3;
+    pinCol = 4;
+    parentNameCol = 5;
+    parentPhoneCol = 6;
+    feeStatusCol = 7;
+    enrolledDateCol = 8;
+    startIndex = 0;
+  }
+
+  const existingStudents = AcademyDB.getStudents() || [];
+  let maxIdNum = 1000;
+  existingStudents.forEach(s => {
+    const match = (s.id || '').match(/STU-(\d+)/i);
+    if (match) {
+      const num = parseInt(match[1], 10);
+      if (num > maxIdNum) maxIdNum = num;
+    }
+  });
+
+  let addedCount = 0;
+  let updatedCount = 0;
+  const today = new Date().toISOString().split('T')[0];
+
+  for (let i = startIndex; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row || row.length === 0) continue;
+
+    const name = (nameCol >= 0 && row[nameCol] ? row[nameCol] : '').trim();
+    if (!name) continue; // Skip rows without student name
+
+    const phone = (phoneCol >= 0 && row[phoneCol] ? row[phoneCol] : '').trim();
+    const rawId = (idCol >= 0 && row[idCol] ? row[idCol] : '').trim();
+    const standard = normalizeStandard(standardCol >= 0 && row[standardCol] ? row[standardCol] : '');
+    const pin = (pinCol >= 0 && row[pinCol] ? row[pinCol] : '').trim() || 'student123';
+    const parentName = (parentNameCol >= 0 && row[parentNameCol] ? row[parentNameCol] : '').trim();
+    const parentPhone = (parentPhoneCol >= 0 && row[parentPhoneCol] ? row[parentPhoneCol] : '').trim();
+    const rawFee = (feeStatusCol >= 0 && row[feeStatusCol] ? row[feeStatusCol] : '').trim().toLowerCase();
+    const feeStatus = rawFee.includes('paid') ? 'Paid' : 'Pending';
+    const enrolledDate = (enrolledDateCol >= 0 && row[enrolledDateCol] ? row[enrolledDateCol] : '').trim() || today;
+
+    // Check if student exists by ID or Phone
+    let existing = null;
+    if (rawId) {
+      existing = existingStudents.find(s => (s.id || '').toLowerCase() === rawId.toLowerCase());
+    }
+    if (!existing && phone) {
+      existing = existingStudents.find(s => (s.phone || '').trim() === phone);
+    }
+
+    if (existing) {
+      existing.name = name;
+      existing.standard = standard;
+      if (phone) existing.phone = phone;
+      if (pin) existing.pin = pin;
+      if (parentName) existing.parentName = parentName;
+      if (parentPhone) existing.parentPhone = parentPhone;
+      existing.feeStatus = feeStatus;
+      updatedCount++;
+    } else {
+      maxIdNum++;
+      const assignedId = rawId || `STU-${maxIdNum}`;
+      existingStudents.push({
+        id: assignedId,
+        name,
+        standard,
+        phone: phone || `980000${String(maxIdNum).padStart(4, '0')}`,
+        pin,
+        parentName,
+        parentPhone,
+        feeStatus,
+        enrolledDate,
+        role: 'student'
+      });
+      addedCount++;
+    }
+  }
+
+  if (addedCount === 0 && updatedCount === 0) {
+    alert('No valid student records found in the CSV file.');
+    return;
+  }
+
+  AcademyDB.saveStudents(existingStudents);
+  renderStudentsTable();
+  renderOverviewStats();
+  renderWhatsAppStudentOptions();
+  alert(`✅ Successfully imported students from CSV!\n\n• ${addedCount} student(s) added\n• ${updatedCount} student(s) updated\nTotal students in directory: ${existingStudents.length}`);
 }
