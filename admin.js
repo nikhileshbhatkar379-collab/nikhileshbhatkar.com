@@ -2,7 +2,9 @@
 // Nikhillesh Bhatkar Learning Academy — Admin Dashboard Controller
 // ------------------------------------------------------------------
 
-document.addEventListener('DOMContentLoaded', () => {
+let adminListenersInitialized = false;
+
+function initAdminPortal() {
   // 1. Enforce Authentication
   const user = Auth.requireAuth('admin');
   if (!user) return;
@@ -81,42 +83,60 @@ document.addEventListener('DOMContentLoaded', () => {
     window.switchAdminTab('tab-notices');
   });
 
+  // Setup Event Listeners
+  if (!adminListenersInitialized) {
+    setupEventListeners();
+    adminListenersInitialized = true;
+  }
+
   // Initial Load of all Data
   loadAllAdminData();
-});
+}
 
 // Refresh functions for individual tabs
 function refreshActiveTabData(tabId) {
-  if (tabId === 'tab-overview') renderOverviewStats();
-  if (tabId === 'tab-students') renderStudentsTable();
-  if (tabId === 'tab-notes') renderNotesTable();
-  if (tabId === 'tab-papers') renderPapersTable();
-  if (tabId === 'tab-notices') renderNoticesManager();
-  if (tabId === 'tab-inquiries') renderInquiriesTable();
-  if (tabId === 'tab-tests') renderTestsTable();
-  if (tabId === 'tab-attendance') renderAttendanceTable();
-  if (tabId === 'tab-doubts') renderDoubtsManager();
-  if (tabId === 'tab-fees') renderReceiptsTable();
-  if (tabId === 'tab-timetable') renderTimetableManager();
-  if (tabId === 'tab-toppers') renderToppersManager();
-  if (tabId === 'tab-whatsapp') renderWhatsAppStudentOptions();
+  try {
+    if (tabId === 'tab-overview') renderOverviewStats();
+    if (tabId === 'tab-students') renderStudentsTable();
+    if (tabId === 'tab-notes') renderNotesTable();
+    if (tabId === 'tab-papers') renderPapersTable();
+    if (tabId === 'tab-notices') renderNoticesManager();
+    if (tabId === 'tab-inquiries') renderInquiriesTable();
+    if (tabId === 'tab-tests') renderTestsTable();
+    if (tabId === 'tab-attendance') renderAttendanceTable();
+    if (tabId === 'tab-doubts') renderDoubtsManager();
+    if (tabId === 'tab-fees') renderReceiptsTable();
+    if (tabId === 'tab-timetable') renderTimetableManager();
+    if (tabId === 'tab-toppers') renderToppersManager();
+    if (tabId === 'tab-whatsapp') renderWhatsAppStudentOptions();
+  } catch (err) {
+    console.error('Error refreshing tab ' + tabId + ':', err);
+  }
 }
 
 function loadAllAdminData() {
-  renderOverviewStats();
-  renderStudentsTable();
-  renderNotesTable();
-  renderPapersTable();
-  renderNoticesManager();
-  renderInquiriesTable();
-  renderTestsTable();
-  renderAttendanceTable();
-  renderDoubtsManager();
-  renderReceiptsTable();
-  renderTimetableManager();
-  renderToppersManager();
-  renderWhatsAppStudentOptions();
-  setupEventListeners();
+  const fns = [
+    renderOverviewStats,
+    renderStudentsTable,
+    renderNotesTable,
+    renderPapersTable,
+    renderNoticesManager,
+    renderInquiriesTable,
+    renderTestsTable,
+    renderAttendanceTable,
+    renderDoubtsManager,
+    renderReceiptsTable,
+    renderTimetableManager,
+    renderToppersManager,
+    renderWhatsAppStudentOptions
+  ];
+  fns.forEach(fn => {
+    try {
+      if (typeof fn === 'function') fn();
+    } catch (e) {
+      console.error('Error in ' + (fn.name || 'render function') + ':', e);
+    }
+  });
 }
 
 // -------------------------------------------------------------
@@ -183,7 +203,7 @@ function renderOverviewStats() {
 // 2. STUDENTS MANAGEMENT
 // -------------------------------------------------------------
 function renderStudentsTable() {
-  const students = AcademyDB.getStudents();
+  const students = AcademyDB.getStudents() || [];
   const search = (document.getElementById('studentSearchInput')?.value || '').toLowerCase().trim();
   const standardFilter = document.getElementById('studentStandardFilter')?.value || 'all';
   const feeFilter = document.getElementById('studentFeeFilter')?.value || 'all';
@@ -192,13 +212,20 @@ function renderStudentsTable() {
   if (!tbody) return;
 
   const filtered = students.filter(s => {
-    const matchSearch = !search ||
-      s.name.toLowerCase().includes(search) ||
-      s.id.toLowerCase().includes(search) ||
-      s.phone.includes(search) ||
-      (s.parentName && s.parentName.toLowerCase().includes(search));
+    if (!s) return false;
+    const name = (s.name || '').toLowerCase();
+    const id = (s.id || '').toLowerCase();
+    const phone = s.phone || '';
+    const parent = (s.parentName || '').toLowerCase();
+    const std = s.standard || '';
 
-    const matchStandard = standardFilter === 'all' || s.standard.includes(standardFilter) || s.standard === standardFilter;
+    const matchSearch = !search ||
+      name.includes(search) ||
+      id.includes(search) ||
+      phone.includes(search) ||
+      parent.includes(search);
+
+    const matchStandard = standardFilter === 'all' || std.includes(standardFilter) || std === standardFilter;
     const matchFee = feeFilter === 'all' || s.feeStatus === feeFilter;
 
     return matchSearch && matchStandard && matchFee;
@@ -232,17 +259,69 @@ function renderStudentsTable() {
 }
 
 window.openAddStudentModal = function() {
-  document.getElementById('studentModalTitle').textContent = 'Add New Enrolled Student';
-  document.getElementById('modalStudentId').value = '';
-  document.getElementById('modalStudentName').value = '';
-  document.getElementById('modalStudentStandard').value = 'Standard 10 (SSC)';
-  document.getElementById('modalStudentPhone').value = '';
-  document.getElementById('modalStudentPin').value = 'student123';
-  document.getElementById('modalParentName').value = '';
-  document.getElementById('modalParentPhone').value = '';
-  document.getElementById('modalFeeStatus').value = 'Paid';
+  const title = document.getElementById('studentModalTitle');
+  if (title) title.textContent = 'Add New Enrolled Student';
+  const idInput = document.getElementById('modalStudentId');
+  if (idInput) idInput.value = '';
+  const nameInput = document.getElementById('modalStudentName');
+  if (nameInput) nameInput.value = '';
+  const stdInput = document.getElementById('modalStudentStandard');
+  if (stdInput) stdInput.value = 'Standard 10 (SSC)';
+  const phoneInput = document.getElementById('modalStudentPhone');
+  if (phoneInput) phoneInput.value = '';
+  const pinInput = document.getElementById('modalStudentPin');
+  if (pinInput) pinInput.value = 'student123';
+  const parentNameInput = document.getElementById('modalParentName');
+  if (parentNameInput) parentNameInput.value = '';
+  const parentPhoneInput = document.getElementById('modalParentPhone');
+  if (parentPhoneInput) parentPhoneInput.value = '';
+  const feeStatusInput = document.getElementById('modalFeeStatus');
+  if (feeStatusInput) feeStatusInput.value = 'Paid';
 
-  document.getElementById('studentModal').style.display = 'flex';
+  const modal = document.getElementById('studentModal');
+  if (modal) modal.style.display = 'flex';
+};
+
+window.triggerStudentCsvImport = function() {
+  const input = document.getElementById('importStudentsCsvInput');
+  if (input) input.click();
+};
+
+window.handleStudentCsvUpload = function(e) {
+  const file = e?.target?.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try {
+      const text = evt.target?.result;
+      if (typeof text !== 'string' || !text.trim()) {
+        alert('⚠️ The selected CSV file is empty.');
+        return;
+      }
+      importStudentsFromCSV(text);
+    } catch (err) {
+      alert('❌ Error parsing CSV file: ' + (err.message || 'Unknown error'));
+    } finally {
+      const input = document.getElementById('importStudentsCsvInput');
+      if (input) input.value = '';
+    }
+  };
+  reader.onerror = () => {
+    alert('❌ Error reading file. Please try again.');
+    const input = document.getElementById('importStudentsCsvInput');
+    if (input) input.value = '';
+  };
+  reader.readAsText(file);
+};
+
+window.exportStudentsToCsv = function() {
+  const students = AcademyDB.getStudents() || [];
+  let csv = 'Student ID,Name,Standard,Phone,PIN,Parent Name,Parent Phone,Fee Status,Enrolled Date\n';
+  students.forEach(s => {
+    csv += `"${s.id || ''}","${s.name || ''}","${s.standard || ''}","${s.phone || ''}","${s.pin || ''}","${s.parentName || ''}","${s.parentPhone || ''}","${s.feeStatus || 'Paid'}","${s.enrolledDate || ''}"\n`;
+  });
+  downloadFile(csv, 'academy_students.csv', 'text/csv');
 };
 
 window.openEditStudentModal = function(studentId) {
@@ -1672,7 +1751,10 @@ function exitEditableTimetableMode() {
 // -------------------------------------------------------------
 function setupEventListeners() {
   // Modal Triggers
-  document.getElementById('openAddStudentModalBtn')?.addEventListener('click', openAddStudentModal);
+  const openStudentBtn = document.getElementById('openAddStudentModalBtn');
+  if (openStudentBtn && !openStudentBtn.onclick) {
+    openStudentBtn.addEventListener('click', () => window.openAddStudentModal?.());
+  }
   document.getElementById('openAddNoteModalBtn')?.addEventListener('click', openAddNoteModal);
   document.getElementById('openAddPaperModalBtn')?.addEventListener('click', openAddPaperModal);
   document.getElementById('openAddTestBtn')?.addEventListener('click', openAddTestModal);
@@ -2505,45 +2587,19 @@ function setupEventListeners() {
   // Import & Export CSV Buttons
   const importCsvBtn = document.getElementById('importStudentsCsvBtn');
   const importCsvInput = document.getElementById('importStudentsCsvInput');
+  const exportStudentsBtn = document.getElementById('exportStudentsCsvBtn');
 
-  importCsvBtn?.addEventListener('click', () => {
-    importCsvInput?.click();
-  });
+  if (importCsvBtn && !importCsvBtn.onclick) {
+    importCsvBtn.addEventListener('click', () => window.triggerStudentCsvImport?.());
+  }
 
-  importCsvInput?.addEventListener('change', (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  if (importCsvInput && !importCsvInput.onchange) {
+    importCsvInput.addEventListener('change', (e) => window.handleStudentCsvUpload?.(e));
+  }
 
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      try {
-        const text = evt.target?.result;
-        if (typeof text !== 'string' || !text.trim()) {
-          alert('⚠️ The selected CSV file is empty.');
-          return;
-        }
-        importStudentsFromCSV(text);
-      } catch (err) {
-        alert('❌ Error parsing CSV file: ' + (err.message || 'Unknown error'));
-      } finally {
-        importCsvInput.value = '';
-      }
-    };
-    reader.onerror = () => {
-      alert('❌ Error reading file. Please try again.');
-      importCsvInput.value = '';
-    };
-    reader.readAsText(file);
-  });
-
-  document.getElementById('exportStudentsCsvBtn')?.addEventListener('click', () => {
-    const students = AcademyDB.getStudents();
-    let csv = 'Student ID,Name,Standard,Phone,PIN,Parent Name,Parent Phone,Fee Status,Enrolled Date\n';
-    students.forEach(s => {
-      csv += `"${s.id}","${s.name}","${s.standard}","${s.phone}","${s.pin}","${s.parentName || ''}","${s.parentPhone || ''}","${s.feeStatus}","${s.enrolledDate || ''}"\n`;
-    });
-    downloadFile(csv, 'academy_students.csv', 'text/csv');
-  });
+  if (exportStudentsBtn && !exportStudentsBtn.onclick) {
+    exportStudentsBtn.addEventListener('click', () => window.exportStudentsToCsv?.());
+  }
 
   document.getElementById('exportInquiriesCsvBtn')?.addEventListener('click', () => {
     const inquiries = AcademyDB.getInquiries();
@@ -2806,4 +2862,13 @@ function importStudentsFromCSV(csvText) {
   renderOverviewStats();
   renderWhatsAppStudentOptions();
   alert(`✅ Successfully imported students from CSV!\n\n• ${addedCount} student(s) added\n• ${updatedCount} student(s) updated\nTotal students in directory: ${existingStudents.length}`);
+}
+
+// -------------------------------------------------------------
+// INITIALIZE ADMIN PORTAL (After all functions and handlers are defined)
+// -------------------------------------------------------------
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAdminPortal);
+} else {
+  initAdminPortal();
 }

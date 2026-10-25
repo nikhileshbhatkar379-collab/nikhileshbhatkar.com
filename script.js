@@ -4,7 +4,8 @@
 
 /* Update the copyright year automatically */
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('year').textContent = new Date().getFullYear();
+  const yearEl = document.getElementById('year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
 
   // Hide gallery placeholder if real images loaded
   const galleryGrid = document.querySelector('.gallery-grid');
