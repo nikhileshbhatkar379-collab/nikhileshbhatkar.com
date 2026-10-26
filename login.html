@@ -120,18 +120,6 @@
   <script src="script.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Check if user is already logged in
-      const currentUser = Auth.getCurrentUser();
-      if (currentUser) {
-        if (currentUser.role === 'admin') {
-          window.location.href = 'admin.html';
-          return;
-        } else if (currentUser.role === 'student') {
-          window.location.href = 'student.html';
-          return;
-        }
-      }
-
       const tabStudent = document.getElementById('tabStudent');
       const tabAdmin = document.getElementById('tabAdmin');
       const studentForm = document.getElementById('studentLoginForm');
