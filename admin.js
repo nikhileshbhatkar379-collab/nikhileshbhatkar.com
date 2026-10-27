@@ -18,6 +18,16 @@ function initAdminPortal() {
     adminDisplayName.textContent = user.name + (isFaculty ? ' (Faculty)' : '');
   }
 
+  // Logout Handler — works for both admin and faculty
+  const logoutBtn = document.getElementById('adminLogoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      if (confirm('Are you sure you want to log out?')) {
+        Auth.logout();
+      }
+    });
+  }
+
   // 2. Sidebar Tab Navigation — filter for faculty
   const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
   const tabContents = document.querySelectorAll('.admin-tab-content');
