@@ -1087,13 +1087,13 @@ window.updateReceiptStudentInfo = function() {
     const startYear = enrolledDate.getFullYear();
     const startMonth = enrolledDate.getMonth();
     const endDate = new Date();
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     for (let y = startYear; y <= endDate.getFullYear(); y++) {
       const mStart = (y === startYear) ? startMonth : 0;
       const mEnd = (y === endDate.getFullYear()) ? endDate.getMonth() : 11;
       for (let m = mStart; m <= mEnd; m++) {
-        const date = new Date(y, m, 1);
-        const value = date.toISOString().split('T')[0].substring(0, 7); // YYYY-MM
-        const label = date.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+        const value = y + '-' + String(m + 1).padStart(2, '0'); // YYYY-MM
+        const label = monthNames[m] + ' ' + y;
         const option = document.createElement('option');
         option.value = value;
         option.textContent = label;
