@@ -1922,8 +1922,29 @@ const AcademyDB = {
 
 // Authentication Controller
 const Auth = {
+  // Initialize faculty account in localStorage (runs once)
+  _initFacultyAccount: () => {
+    try {
+      const existing = localStorage.getItem('academy_faculty_accounts');
+      if (!existing) {
+        const facultyAccounts = [
+          {
+            username: 'amit',
+            email: 'amit.pawaskar@academy.com',
+            password: 'amit' + '123',
+            name: 'Amit Pawaskar',
+            role: 'faculty'
+          }
+        ];
+        localStorage.setItem('academy_faculty_accounts', JSON.stringify(facultyAccounts));
+      }
+    } catch (e) {}
+  },
+
   // Admin Login
   loginAdmin: (usernameOrEmail, password) => {
+    Auth._initFacultyAccount(); // Ensure faculty accounts exist
+
     const primaryAdmin = AcademyDB.getAdmin();
     const cleanUser = (usernameOrEmail || '').trim().toLowerCase();
     const cleanPass = (password || '').trim();
@@ -1931,13 +1952,7 @@ const Auth = {
     // Accounts authorized for Admin / Faculty Dashboard
     const adminAccounts = [
       primaryAdmin,
-      {
-        username: 'amit',
-        email: 'amit.pawaskar@academy.com',
-        password: 'amit123',
-        name: 'Amit Pawaskar',
-        role: 'faculty'
-      }
+      ...(JSON.parse(localStorage.getItem('academy_faculty_accounts') || '[]'))
     ];
 
     const matchedAdmin = adminAccounts.find(a =>
