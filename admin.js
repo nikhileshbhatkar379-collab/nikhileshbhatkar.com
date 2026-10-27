@@ -1106,15 +1106,15 @@ function renderAttendanceTable() {
 
     return `
       <tr>
-        <td><code>${a.studentId}</code></td>
-        <td><strong>${a.studentName}</strong></td>
-        <td><span class="badge badge-standard">${a.standard}</span></td>
+        <td><code>${s.id}</code></td>
+        <td><strong>${s.name}</strong></td>
+        <td><span class="badge badge-standard">${s.standard}</span></td>
         <td>${a.totalLectures}</td>
         <td><strong>${a.attendedLectures}</strong></td>
         <td><span class="badge ${pctBadge}">${a.percentage}%</span></td>
         <td><small>${a.lastMarkedDate || '—'}</small></td>
         <td>
-          <button class="btn-toggle-fee ${a.status === 'Present' ? 'fee-paid' : (a.status === 'Leave' ? 'fee-leave' : 'fee-pending')}" onclick="toggleTodayAttendance('${a.studentId}')">
+          <button class="btn-toggle-fee ${a.status === 'Present' ? 'fee-paid' : (a.status === 'Leave' ? 'fee-leave' : 'fee-pending')}" onclick="toggleTodayAttendance('${s.id}')">
             ${a.status === 'Present' ? '✅ Present' : (a.status === 'Leave' ? '🌙 Leave' : '❌ Absent')}
           </button>
         </td>
