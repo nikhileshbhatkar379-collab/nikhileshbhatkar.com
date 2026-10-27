@@ -2624,6 +2624,10 @@ footer a { color: #cba235; }
   background: #fee2e2 !important;
   color: #b91c1c !important;
 }
+.fee-leave {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+}
 
 .action-buttons {
   display: flex;
@@ -3387,6 +3391,14 @@ footer a { color: #cba235; }
 .badge-absent {
   background: #fee2e2;
   color: #b91c1c;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+}
+.badge-leave {
+  background: #fef3c7;
+  color: #b45309;
   font-weight: 700;
   padding: 0.25rem 0.65rem;
   border-radius: 20px;

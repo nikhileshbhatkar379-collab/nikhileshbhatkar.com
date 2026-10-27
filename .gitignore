@@ -4,4 +4,6 @@ Thumbs.db
 __pycache__/
 *.tmp
 .claude/
+node_modules/
+package-lock.json
 

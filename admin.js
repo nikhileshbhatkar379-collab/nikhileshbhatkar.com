@@ -362,7 +362,15 @@ window.deleteStudent = function(studentId) {
     let students = AcademyDB.getStudents();
     students = students.filter(s => s.id !== studentId);
     AcademyDB.saveStudents(students);
+
+    // Also drop attendance records for the removed student so the
+    // tracker stays in sync with the student list.
+    const attendance = AcademyDB.getAttendance() || [];
+    const remaining = attendance.filter(a => a.studentId !== studentId);
+    AcademyDB.saveAttendance(remaining);
+
     renderStudentsTable();
+    renderAttendanceTable();
     renderOverviewStats();
     renderWhatsAppStudentOptions();
   }
@@ -769,6 +777,80 @@ window.openAddTestModal = function() {
   document.getElementById('testModal').style.display = 'flex';
 };
 
+window.openStandardTestModal = function() {
+  const stdSelect = document.getElementById('stdSelect');
+  if (stdSelect) {
+    stdSelect.innerHTML = `
+      <option value="">Select Standard</option>
+      <option value="Standard 8">Standard 8</option>
+      <option value="Standard 9">Standard 9</option>
+      <option value="Standard 10 (SSC)">Standard 10 (SSC)</option>
+      <option value="Standard 12 (HSC)">Standard 12 (HSC)</option>
+    `;
+  }
+  // Reset form fields
+  document.getElementById('examTitle').value = '';
+  document.getElementById('examSubject').value = '';
+  document.getElementById('examDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('examTotal').value = '';
+  document.getElementById('examPass').value = '';
+  document.getElementById('stdMarksBody').innerHTML = '';
+  // Show step 1
+  document.getElementById('stdStep1').style.display = '';
+  document.getElementById('stdStep2').style.display = 'none';
+  document.getElementById('standardTestModal').style.display = 'flex';
+};
+
+// Step 1 -> Step 2: build the per-student marks table
+window.stdStepNext = function() {
+  const std = document.getElementById('stdSelect').value;
+  const examTitle = document.getElementById('examTitle').value.trim();
+  const examSubject = document.getElementById('examSubject').value.trim();
+  const examTotal = Number(document.getElementById('examTotal').value);
+
+  if (!std) { alert('⚠️ Please select a standard first.'); return; }
+  if (!examTitle) { alert('⚠️ Please enter the test / exam title.'); return; }
+  if (!examSubject) { alert('⚠️ Please enter the subject.'); return; }
+  if (!examTotal || examTotal <= 0) { alert('⚠️ Please enter valid total marks.'); return; }
+
+  const students = (AcademyDB.getStudents() || []).filter(s => s.standard === std);
+  const tbody = document.getElementById('stdMarksBody');
+  if (!tbody) return;
+
+  if (students.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" class="text-center">No students enrolled for ${std} yet.</td></tr>`;
+  } else {
+    tbody.innerHTML = students.map((s, i) => `
+      <tr>
+        <td style="text-align:center;">${i + 1}</td>
+        <td><strong>${s.name}</strong> <small style="color:#64748b;">(${s.id})</small></td>
+        <td>
+          <input type="number" id="stdMarks-${s.id}" min="0" max="${examTotal}" value=""
+            style="width:90px;padding:6px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.9rem;" placeholder="0">
+        </td>
+        <td>
+          <input type="text" id="stdRemarks-${s.id}" value=""
+            style="width:100%;padding:6px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.85rem;" placeholder="Optional remarks">
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  document.getElementById('stdStep2Summary').innerHTML =
+    `📌 <strong>${examTitle}</strong> · ${examSubject} · ${std} · Total: ${examTotal} marks` +
+    (document.getElementById('examPass').value ? ` · Passing: ${document.getElementById('examPass').value}` : '') +
+    ` · ${students.length} student(s)`;
+
+  document.getElementById('stdStep1').style.display = 'none';
+  document.getElementById('stdStep2').style.display = '';
+};
+
+// Step 2 -> Step 1
+window.stdStepBack = function() {
+  document.getElementById('stdStep1').style.display = '';
+  document.getElementById('stdStep2').style.display = 'none';
+};
+
 window.deleteTestResult = function(testId) {
   if (confirm('Delete this test result record?')) {
     let tests = AcademyDB.getTestResults() || [];
@@ -867,16 +949,38 @@ window.printStudentReportCard = function(studentId) {
 // 8. ATTENDANCE TRACKER
 // -------------------------------------------------------------
 function renderAttendanceTable() {
-  const attendance = AcademyDB.getAttendance() || [];
   const tbody = document.getElementById('attendanceTableBody');
   if (!tbody) return;
 
-  if (attendance.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center">No attendance records found.</td></tr>`;
+  // Drive the table from the Student Management list so every enrolled
+  // student appears — even those who have no attendance record yet.
+  const students = AcademyDB.getStudents() || [];
+  const attendance = AcademyDB.getAttendance() || [];
+
+  if (students.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center">No students enrolled yet.</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = attendance.map(a => {
+  tbody.innerHTML = students.map(s => {
+    const a = attendance.find(x => x.studentId === s.id);
+    if (!a) {
+      // No attendance record yet — show as not-yet-marked
+      return `
+        <tr>
+          <td><code>${s.id}</code></td>
+          <td><strong>${s.name}</strong></td>
+          <td><span class="badge badge-standard">${s.standard}</span></td>
+          <td>0</td>
+          <td>0</td>
+          <td><span class="badge badge-pending">0%</span></td>
+          <td><small>—</small></td>
+          <td>
+            <button class="btn-toggle-fee fee-pending" onclick="toggleTodayAttendance('${s.id}')">❌ Absent</button>
+          </td>
+        </tr>`;
+    }
+
     let pctBadge = 'badge-paid';
     if (a.percentage < 75) pctBadge = 'badge-pending';
     else if (a.percentage < 90) pctBadge = 'badge-regular';
@@ -891,8 +995,8 @@ function renderAttendanceTable() {
         <td><span class="badge ${pctBadge}">${a.percentage}%</span></td>
         <td><small>${a.lastMarkedDate || '—'}</small></td>
         <td>
-          <button class="btn-toggle-fee ${a.status === 'Present' ? 'fee-paid' : 'fee-pending'}" onclick="toggleTodayAttendance('${a.studentId}')">
-            ${a.status === 'Present' ? '✅ Present' : '❌ Absent'}
+          <button class="btn-toggle-fee ${a.status === 'Present' ? 'fee-paid' : (a.status === 'Leave' ? 'fee-leave' : 'fee-pending')}" onclick="toggleTodayAttendance('${a.studentId}')">
+            ${a.status === 'Present' ? '✅ Present' : (a.status === 'Leave' ? '🌙 Leave' : '❌ Absent')}
           </button>
         </td>
       </tr>
@@ -902,20 +1006,49 @@ function renderAttendanceTable() {
 
 window.toggleTodayAttendance = function(studentId) {
   let attendance = AcademyDB.getAttendance() || [];
-  const record = attendance.find(a => a.studentId === studentId);
-  if (record) {
-    if (record.status === 'Present') {
-      record.status = 'Absent';
-      record.attendedLectures = Math.max(0, record.attendedLectures - 1);
-    } else {
-      record.status = 'Present';
-      record.attendedLectures += 1;
-    }
-    record.percentage = Math.round((record.attendedLectures / record.totalLectures) * 1000) / 10;
-    record.lastMarkedDate = new Date().toISOString().split('T')[0];
-    AcademyDB.saveAttendance(attendance);
-    renderAttendanceTable();
+  const students = AcademyDB.getStudents() || [];
+  const student = students.find(s => s.id === studentId);
+  let record = attendance.find(a => a.studentId === studentId);
+
+  // Auto-create an attendance record for students who have none yet
+  if (!record && student) {
+    record = {
+      studentId: student.id,
+      studentName: student.name,
+      standard: student.standard,
+      totalLectures: 0,
+      attendedLectures: 0,
+      percentage: 0,
+      lastMarkedDate: null,
+      status: 'Absent',
+      leaveCount: 0,
+      history: []
+    };
+    attendance.push(record);
   }
+  if (!record) return;
+
+  if (!record.leaveCount) record.leaveCount = 0;
+
+  // Cycle: Present -> Absent -> Leave -> Present
+  if (record.status === 'Present') {
+    record.status = 'Absent';
+    record.attendedLectures = Math.max(0, record.attendedLectures - 1);
+  } else if (record.status === 'Leave') {
+    record.status = 'Present';
+    record.attendedLectures += 1;
+    record.leaveCount = Math.max(0, record.leaveCount - 1);
+  } else {
+    // Absent -> Leave (excused, doesn't count against attendance)
+    record.status = 'Leave';
+    record.leaveCount += 1;
+  }
+
+  const effectiveTotal = Math.max(1, record.totalLectures - record.leaveCount);
+  record.percentage = Math.round((record.attendedLectures / effectiveTotal) * 1000) / 10;
+  record.lastMarkedDate = new Date().toISOString().split('T')[0];
+  AcademyDB.saveAttendance(attendance);
+  renderAttendanceTable();
 };
 
 window.openAttendanceModal = function() {
@@ -925,16 +1058,24 @@ window.openAttendanceModal = function() {
   if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
 
   if (container) {
-    container.innerHTML = students.map(s => `
+    container.innerHTML = students.map(s => {
+      // Pre-fill from existing record if present
+      const existing = (AcademyDB.getAttendance() || []).find(a => a.studentId === s.id);
+      const currentStatus = (existing && (existing.status === 'Present' || existing.status === 'Absent' || existing.status === 'Leave')) ? existing.status : 'Present';
+      return `
       <div class="attendance-check-item" style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;">
         <div>
           <strong>${s.name}</strong> <small>(${s.standard})</small>
         </div>
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-          <input type="checkbox" class="att-check" data-id="${s.id}" checked> Present
+          <select class="att-status" data-id="${s.id}" style="padding:4px 8px;border-radius:6px;border:1px solid #cbd5e1;font-size:0.85rem;">
+            <option value="Present" ${currentStatus === 'Present' ? 'selected' : ''}>✅ Present</option>
+            <option value="Absent" ${currentStatus === 'Absent' ? 'selected' : ''}>❌ Absent</option>
+            <option value="Leave" ${currentStatus === 'Leave' ? 'selected' : ''}>🌙 Leave</option>
+          </select>
         </label>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
   }
 
   document.getElementById('attendanceModal').style.display = 'flex';
@@ -1758,6 +1899,9 @@ function setupEventListeners() {
   document.getElementById('openAddNoteModalBtn')?.addEventListener('click', openAddNoteModal);
   document.getElementById('openAddPaperModalBtn')?.addEventListener('click', openAddPaperModal);
   document.getElementById('openAddTestBtn')?.addEventListener('click', openAddTestModal);
+  document.getElementById('openStandardTestBtn')?.addEventListener('click', openStandardTestModal);
+  document.getElementById('stdNextBtn')?.addEventListener('click', stdStepNext);
+  document.getElementById('stdBackBtn')?.addEventListener('click', stdStepBack);
   document.getElementById('openAddReceiptBtn')?.addEventListener('click', openAddReceiptModal);
   document.getElementById('openAddTopperBtn')?.addEventListener('click', openAddTopperModal);
   document.getElementById('markTodayAttendanceBtn')?.addEventListener('click', openAttendanceModal);
@@ -2163,6 +2307,7 @@ function setupEventListeners() {
       AcademyDB.saveStudents(students);
       closeStudentModal();
       renderStudentsTable();
+      renderAttendanceTable(); // attendance tracker now driven by student list
       renderOverviewStats();
       renderWhatsAppStudentOptions();
       alert('✅ Student record saved successfully!');
@@ -2316,6 +2461,64 @@ function setupEventListeners() {
       alert('✅ Test marks logged successfully!');
     });
   }
+
+  // Save Standard-Wise Test Button (Step 2: per-student marks)
+  document.getElementById('saveStandardTestBtn')?.addEventListener('click', () => {
+    const std = document.getElementById('stdSelect')?.value || '';
+    const examTitle = document.getElementById('examTitle')?.value.trim();
+    const examSubject = document.getElementById('examSubject')?.value.trim();
+    const examDate = document.getElementById('examDate')?.value || new Date().toISOString().split('T')[0];
+    const examTotal = Number(document.getElementById('examTotal')?.value || 0);
+    const examPass = Number(document.getElementById('examPass')?.value || 0);
+
+    if (!std || !examTitle || !examSubject || examTotal <= 0) {
+      alert('⚠️ Please go back and fill in the common details first.');
+      return;
+    }
+
+    const students = (AcademyDB.getStudents() || []).filter(s => s.standard === std);
+    if (students.length === 0) {
+      alert('⚠️ No students enrolled for ' + std);
+      return;
+    }
+
+    const tests = AcademyDB.getTestResults() || [];
+    let saved = 0;
+    students.forEach(s => {
+      const marksInput = document.getElementById('stdMarks-' + s.id);
+      const remarksInput = document.getElementById('stdRemarks-' + s.id);
+      const obtained = Number(marksInput?.value || 0);
+      const remarks = remarksInput?.value.trim() || 'Class test';
+
+      const pct = examTotal > 0 ? (obtained / examTotal) * 100 : 0;
+      let grade = 'B';
+      if (pct >= 90) grade = 'A+';
+      else if (pct >= 75) grade = 'A';
+      else if (pct >= 60) grade = 'B+';
+      else if (pct >= 50) grade = 'B';
+      else grade = 'C';
+
+      tests.push({
+        id: 'TEST-' + (100 + tests.length + saved + 1),
+        studentId: s.id,
+        studentName: s.name,
+        standard: s.standard,
+        testTitle: examTitle,
+        subject: examSubject,
+        date: examDate,
+        totalMarks: examTotal,
+        marksObtained: obtained,
+        grade,
+        remarks
+      });
+      saved++;
+    });
+
+    AcademyDB.saveTestResults(tests);
+    document.getElementById('standardTestModal').style.display = 'none';
+    renderTestsTable();
+    alert(`✅ Saved test results for ${saved} student(s) of ${std}!`);
+  });
 
   // Receipt Form Submission
   const receiptForm = document.getElementById('receiptModalForm');
@@ -2527,25 +2730,54 @@ function setupEventListeners() {
 
   // Save Attendance Button
   document.getElementById('saveAttendanceBtn')?.addEventListener('click', () => {
-    const checkboxes = document.querySelectorAll('.att-check');
+    const selects = document.querySelectorAll('.att-status');
     const topic = document.getElementById('attendanceTopicInput')?.value.trim() || 'Regular Class Session';
     const date = document.getElementById('attendanceDateInput')?.value || new Date().toISOString().split('T')[0];
 
     let attendance = AcademyDB.getAttendance() || [];
+    const students = AcademyDB.getStudents() || [];
 
-    checkboxes.forEach(cb => {
-      const stuId = cb.getAttribute('data-id');
-      const isPresent = cb.checked;
+    selects.forEach(sel => {
+      const stuId = sel.getAttribute('data-id');
+      const status = sel.value; // Present | Absent | Leave
+      const student = students.find(s => s.id === stuId);
       let rec = attendance.find(a => a.studentId === stuId);
-      if (rec) {
-        rec.totalLectures += 1;
-        if (isPresent) rec.attendedLectures += 1;
-        rec.percentage = Math.round((rec.attendedLectures / rec.totalLectures) * 1000) / 10;
-        rec.lastMarkedDate = date;
-        rec.status = isPresent ? 'Present' : 'Absent';
-        if (!rec.history) rec.history = [];
-        rec.history.unshift({ date, status: isPresent ? 'Present' : 'Absent', topic });
+
+      // Auto-create an attendance record for students who have none yet
+      if (!rec && student) {
+        rec = {
+          studentId: student.id,
+          studentName: student.name,
+          standard: student.standard,
+          totalLectures: 0,
+          attendedLectures: 0,
+          percentage: 0,
+          lastMarkedDate: null,
+          status: 'Absent',
+          leaveCount: 0,
+          history: []
+        };
+        attendance.push(rec);
       }
+      if (!rec) return;
+      if (!rec.leaveCount) rec.leaveCount = 0;
+
+      const wasLeave = (rec.status === 'Leave');
+      const nowLeave = (status === 'Leave');
+
+      if (nowLeave && !wasLeave) rec.leaveCount += 1;
+      if (!nowLeave && wasLeave) rec.leaveCount = Math.max(0, rec.leaveCount - 1);
+
+      rec.totalLectures += 1;
+      if (status === 'Present') rec.attendedLectures += 1;
+      // Absent and Leave both do NOT add to attendedLectures
+
+      const effectiveTotal = Math.max(1, rec.totalLectures - rec.leaveCount);
+      rec.percentage = Math.round((rec.attendedLectures / effectiveTotal) * 1000) / 10;
+      rec.lastMarkedDate = date;
+      rec.status = status;
+      if (!rec.history) rec.history = [];
+      rec.history.unshift({ date, status, topic });
     });
 
     AcademyDB.saveAttendance(attendance);

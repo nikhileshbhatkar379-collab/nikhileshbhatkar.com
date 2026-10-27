@@ -645,7 +645,9 @@ function renderStudentAttendance(user) {
           <div class="score-stat-icon">⚡</div>
           <div class="score-stat-label">Latest Status</div>
           <div class="score-stat-val" style="font-size:1.2rem;margin-top:0.4rem;">
-            <span class="badge-present">${myAtt.status || 'Present'}</span>
+            <span class="${(myAtt.status || 'Present') === 'Present' ? 'badge-present' : ((myAtt.status || 'Present') === 'Leave' ? 'badge-leave' : 'badge-absent')}">
+              ${(myAtt.status || 'Present') === 'Present' ? '✅ Present' : ((myAtt.status || 'Present') === 'Leave' ? '🌙 Leave' : '❌ Absent')}
+            </span>
           </div>
         </div>
       </div>
@@ -666,17 +668,19 @@ function renderStudentAttendance(user) {
               </tr>
             </thead>
             <tbody>
-              ${myAtt.history.map(h => `
+              ${myAtt.history.map(h => {
+                const st = h.status || 'Present';
+                const cls = st === 'Present' ? 'badge-present' : (st === 'Leave' ? 'badge-leave' : 'badge-absent');
+                const label = st === 'Present' ? '✅ Present' : (st === 'Leave' ? '🌙 Leave' : '❌ Absent');
+                return `
                 <tr>
                   <td><strong>${h.date}</strong></td>
                   <td>${h.topic || 'Classroom Lecture & Practice Session'}</td>
                   <td>
-                    <span class="${h.status === 'Present' ? 'badge-present' : 'badge-absent'}">
-                      ${h.status === 'Present' ? '✅ Present' : '❌ Absent'}
-                    </span>
+                    <span class="${cls}">${label}</span>
                   </td>
-                </tr>
-              `).join('')}
+                </tr>`;
+              }).join('')}
             </tbody>
           </table>
         </div>
