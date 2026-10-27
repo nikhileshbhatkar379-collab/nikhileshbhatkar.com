@@ -59,6 +59,9 @@
         <button class="role-tab active" id="tabStudent" role="tab" aria-selected="true" aria-controls="studentLoginForm" data-i18n="login_tab_student">
           🎓 Student Portal
         </button>
+        <button class="role-tab" id="tabFaculty" role="tab" aria-selected="false" aria-controls="adminLoginForm" data-i18n="login_tab_faculty">
+          👨‍🏫 Faculty Panel
+        </button>
         <button class="role-tab" id="tabAdmin" role="tab" aria-selected="false" aria-controls="adminLoginForm" data-i18n="login_tab_admin">
           ⚙️ Admin Dashboard
         </button>
@@ -85,16 +88,20 @@
       <!-- Admin Login Form -->
       <form id="adminLoginForm" class="login-form" role="tabpanel" aria-labelledby="tabAdmin" style="display:none;">
         <div class="form-group">
-          <label for="adminUsername" data-i18n="login_lbl_admuser">Admin Username or Email</label>
-          <input type="text" id="adminUsername" name="admin_username" placeholder="e.g. admin or nikhileshbhatkar379@gmail.com" required autocomplete="username">
+          <label for="adminUsername" data-i18n="login_lbl_admuser">Username or Email</label>
+          <input type="text" id="adminUsername" name="admin_username" placeholder="e.g. amit or amit.pawaskar@academy.com" required autocomplete="username">
         </div>
 
         <div class="form-group">
-          <label for="adminPassword" data-i18n="login_lbl_admpass">Admin Password</label>
-          <input type="password" id="adminPassword" name="admin_password" placeholder="Enter admin password" required autocomplete="current-password">
+          <label for="adminPassword" data-i18n="login_lbl_admpass">Password</label>
+          <input type="password" id="adminPassword" name="admin_password" placeholder="Enter password" required autocomplete="current-password">
         </div>
 
-        <button type="submit" class="btn-login-submit btn-admin-submit" data-i18n="login_btn_admin">Login to Admin Dashboard →</button>
+        <p id="facultyLoginHint" style="display:none; font-size:0.85rem; color:#059669; margin-top:8px;">
+          👨‍🏫 <strong>Faculty Login:</strong> Use <code>amit</code> / <code>amit123</code> for Faculty Panel access (marks, attendance, notes, papers).
+        </p>
+
+        <button type="submit" class="btn-login-submit btn-admin-submit" data-i18n="login_btn_admin">Login to Dashboard →</button>
       </form>
 
 
@@ -121,6 +128,7 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const tabStudent = document.getElementById('tabStudent');
+      const tabFaculty = document.getElementById('tabFaculty');
       const tabAdmin = document.getElementById('tabAdmin');
       const studentForm = document.getElementById('studentLoginForm');
       const adminForm = document.getElementById('adminLoginForm');
@@ -131,23 +139,43 @@
         if (role === 'student') {
           tabStudent.classList.add('active');
           tabStudent.setAttribute('aria-selected', 'true');
+          tabFaculty.classList.remove('active');
+          tabFaculty.setAttribute('aria-selected', 'false');
           tabAdmin.classList.remove('active');
           tabAdmin.setAttribute('aria-selected', 'false');
 
           studentForm.style.display = 'block';
           adminForm.style.display = 'none';
+        } else if (role === 'faculty') {
+          tabFaculty.classList.add('active');
+          tabFaculty.setAttribute('aria-selected', 'true');
+          tabStudent.classList.remove('active');
+          tabStudent.setAttribute('aria-selected', 'false');
+          tabAdmin.classList.remove('active');
+          tabAdmin.setAttribute('aria-selected', 'false');
+
+          adminForm.style.display = 'block';
+          studentForm.style.display = 'none';
+          // Show faculty hint
+          const facultyHint = document.getElementById('facultyLoginHint');
+          if (facultyHint) facultyHint.style.display = 'block';
         } else {
           tabAdmin.classList.add('active');
           tabAdmin.setAttribute('aria-selected', 'true');
           tabStudent.classList.remove('active');
           tabStudent.setAttribute('aria-selected', 'false');
+          tabFaculty.classList.remove('active');
+          tabFaculty.setAttribute('aria-selected', 'false');
 
           adminForm.style.display = 'block';
           studentForm.style.display = 'none';
+          const facultyHint = document.getElementById('facultyLoginHint');
+          if (facultyHint) facultyHint.style.display = 'none';
         }
       }
 
       tabStudent.addEventListener('click', () => switchTab('student'));
+      tabFaculty.addEventListener('click', () => switchTab('faculty'));
       tabAdmin.addEventListener('click', () => switchTab('admin'));
 
       // Quick Fill Buttons (safely check if elements exist)

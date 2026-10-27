@@ -1931,7 +1931,7 @@ const Auth = {
         email: 'amit.pawaskar@academy.com',
         password: 'amit123',
         name: 'Amit Pawaskar',
-        role: 'admin'
+        role: 'faculty'
       }
     ];
 
@@ -1942,7 +1942,7 @@ const Auth = {
 
     if (matchedAdmin) {
       const session = {
-        role: 'admin',
+        role: matchedAdmin.role,
         name: matchedAdmin.name,
         email: matchedAdmin.email,
         username: matchedAdmin.username,
@@ -2017,12 +2017,13 @@ const Auth = {
       window.location.href = 'login.html';
       return null;
     }
-    if (requiredRole && user.role !== requiredRole) {
-      if (user.role === 'admin') {
-        window.location.href = 'admin.html';
-      } else {
-        window.location.href = 'student.html';
-      }
+    // Admin dashboard accepts 'admin' or 'faculty' roles
+    if (requiredRole === 'admin' && user.role !== 'admin' && user.role !== 'faculty') {
+      window.location.href = 'student.html';
+      return null;
+    }
+    if (requiredRole && user.role !== requiredRole && user.role !== 'faculty') {
+      window.location.href = 'student.html';
       return null;
     }
     return user;

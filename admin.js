@@ -5,39 +5,47 @@
 let adminListenersInitialized = false;
 
 function initAdminPortal() {
-  // 1. Enforce Authentication
+  // 1. Enforce Authentication (allows both 'admin' and 'faculty')
   const user = Auth.requireAuth('admin');
   if (!user) return;
 
+  // Faculty mode detection
+  const isFaculty = user.role === 'faculty';
+  window.isFacultyMode = isFaculty;
+
   const adminDisplayName = document.getElementById('adminDisplayName');
   if (adminDisplayName && user.name) {
-    adminDisplayName.textContent = user.name;
+    adminDisplayName.textContent = user.name + (isFaculty ? ' (Faculty)' : '');
   }
 
-  // Logout Handler
-  const logoutBtn = document.getElementById('adminLogoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      if (confirm('Are you sure you want to log out of Admin Dashboard?')) {
-        Auth.logout();
+  // 2. Sidebar Tab Navigation — filter for faculty
+  const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
+  const tabContents = document.querySelectorAll('.admin-tab-content');
+
+  // Tabs allowed for faculty
+  const facultyAllowedTabs = ['tab-notes', 'tab-papers', 'tab-tests', 'tab-attendance', 'tab-doubts'];
+
+  // Hide disallowed tabs for faculty
+  if (isFaculty) {
+    navItems.forEach(btn => {
+      const tabId = btn.getAttribute('data-tab');
+      if (!facultyAllowedTabs.includes(tabId)) {
+        btn.style.display = 'none';
+      }
+    });
+    tabContents.forEach(content => {
+      if (!facultyAllowedTabs.includes(content.id)) {
+        content.style.display = 'none';
       }
     });
   }
 
-  // Sidebar Mobile Toggle
-  const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
-  const adminSidebar = document.getElementById('adminSidebar');
-  if (sidebarToggleBtn && adminSidebar) {
-    sidebarToggleBtn.addEventListener('click', () => {
-      adminSidebar.classList.toggle('open');
-    });
-  }
-
-  // 2. Sidebar Tab Navigation
-  const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
-  const tabContents = document.querySelectorAll('.admin-tab-content');
-
   window.switchAdminTab = function(targetTabId) {
+    // Block faculty from accessing disallowed tabs
+    if (isFaculty && !facultyAllowedTabs.includes(targetTabId)) {
+      return;
+    }
+
     navItems.forEach(btn => {
       if (btn.getAttribute('data-tab') === targetTabId) {
         btn.classList.add('active');
@@ -56,7 +64,14 @@ function initAdminPortal() {
 
     // Close mobile sidebar if open
     if (adminSidebar) adminSidebar.classList.remove('open');
-    refreshActiveTabData(targetTabId);
+
+    // Faculty defaults to Notes tab instead of Overview
+    const defaultTab = isFaculty ? 'tab-notes' : 'tab-overview';
+    if (targetTabId) {
+      refreshActiveTabData(targetTabId);
+    } else {
+      window.switchAdminTab(defaultTab);
+    }
   };
 
   navItems.forEach(item => {
@@ -66,22 +81,37 @@ function initAdminPortal() {
     });
   });
 
-  // Quick Action Buttons on Overview Tab
-  document.getElementById('quickAddStudentBtn')?.addEventListener('click', () => {
-    window.switchAdminTab('tab-students');
-    openAddStudentModal();
-  });
-  document.getElementById('quickAddNoteBtn')?.addEventListener('click', () => {
-    window.switchAdminTab('tab-notes');
-    openAddNoteModal();
-  });
-  document.getElementById('quickAddPaperBtn')?.addEventListener('click', () => {
-    window.switchAdminTab('tab-papers');
-    openAddPaperModal();
-  });
-  document.getElementById('quickAddNoticeBtn')?.addEventListener('click', () => {
-    window.switchAdminTab('tab-notices');
-  });
+  // Quick Action Buttons on Overview Tab — hide for faculty
+  if (!isFaculty) {
+    document.getElementById('quickAddStudentBtn')?.addEventListener('click', () => {
+      window.switchAdminTab('tab-students');
+      openAddStudentModal();
+    });
+    document.getElementById('quickAddNoteBtn')?.addEventListener('click', () => {
+      window.switchAdminTab('tab-notes');
+      openAddNoteModal();
+    });
+    document.getElementById('quickAddPaperBtn')?.addEventListener('click', () => {
+      window.switchAdminTab('tab-papers');
+      openAddPaperModal();
+    });
+    document.getElementById('quickAddNoticeBtn')?.addEventListener('click', () => {
+      window.switchAdminTab('tab-notices');
+    });
+  } else {
+    // Faculty quick actions
+    document.getElementById('quickAddNoteBtn')?.addEventListener('click', () => {
+      window.switchAdminTab('tab-notes');
+      openAddNoteModal();
+    });
+    document.getElementById('quickAddPaperBtn')?.addEventListener('click', () => {
+      window.switchAdminTab('tab-papers');
+      openAddPaperModal();
+    });
+    document.getElementById('quickAddDoubtsBtn')?.addEventListener('click', () => {
+      window.switchAdminTab('tab-doubts');
+    });
+  }
 
   // Setup Event Listeners
   if (!adminListenersInitialized) {
@@ -91,6 +121,10 @@ function initAdminPortal() {
 
   // Initial Load of all Data
   loadAllAdminData();
+  // Auto-switch to default tab for faculty
+  if (isFaculty) {
+    window.switchAdminTab('tab-notes');
+  }
 }
 
 // Refresh functions for individual tabs
