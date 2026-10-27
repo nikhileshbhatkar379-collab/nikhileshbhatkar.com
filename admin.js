@@ -376,6 +376,70 @@ window.deleteStudent = function(studentId) {
   }
 };
 
+// Re-sequence all student IDs sequentially from STU-1001
+// Updates student records AND any linked data (attendance, test results, receipts, etc.)
+window.resequenceStudentIds = function() {
+  const students = AcademyDB.getStudents();
+  if (!students || students.length === 0) {
+    alert('No students to re-sequence.');
+    return;
+  }
+
+  if (!confirm('⚠️ This will re-assign ALL student IDs sequentially from STU-1001.\n\nLinked data (attendance, test marks, fee receipts, WhatsApp alerts) will be updated to match the new IDs.\n\nProceed?')) {
+    return;
+  }
+
+  // Build mapping: oldId -> newId
+  const idMap = {};
+  students.forEach((s, i) => {
+    idMap[s.id] = 'STU-' + (1001 + i);
+  });
+
+  // 1. Update student records
+  students.forEach((s, i) => {
+    s.id = 'STU-' + (1001 + i);
+  });
+  AcademyDB.saveStudents(students);
+
+  // 2. Update attendance records
+  const attendance = AcademyDB.getAttendance() || [];
+  attendance.forEach(a => {
+    if (idMap[a.studentId]) a.studentId = idMap[a.studentId];
+  });
+  AcademyDB.saveAttendance(attendance);
+
+  // 3. Update test results
+  const tests = AcademyDB.getTestResults() || [];
+  tests.forEach(t => {
+    if (idMap[t.studentId]) t.studentId = idMap[t.studentId];
+  });
+  AcademyDB.saveTestResults(tests);
+
+  // 4. Update fee receipts
+  const receipts = AcademyDB.getReceipts() || [];
+  receipts.forEach(r => {
+    if (idMap[r.studentId]) r.studentId = idMap[r.studentId];
+  });
+  AcademyDB.saveReceipts(receipts);
+
+  // 5. Update WhatsApp alert logs (if any)
+  const whatsappLogs = AcademyDB.getWhatsAppLogs?.() || [];
+  whatsappLogs.forEach(l => {
+    if (idMap[l.studentId]) l.studentId = idMap[l.studentId];
+  });
+  if (AcademyDB.saveWhatsAppLogs) AcademyDB.saveWhatsAppLogs(whatsappLogs);
+
+  // Refresh all views
+  renderStudentsTable();
+  renderAttendanceTable();
+  renderTestsTable();
+  renderReceiptsTable();
+  renderOverviewStats();
+  renderWhatsAppStudentOptions();
+
+  alert(`✅ Re-sequenced ${students.length} student(s) from STU-1001 to STU-${1000 + students.length}!\n\nAll linked data (attendance, tests, receipts) updated.`);
+};
+
 // Document upload state variables
 let uploadedNoteFileData = null;
 let uploadedNoteFileName = '';
@@ -2288,8 +2352,17 @@ function setupEventListeners() {
           student.feeStatus = document.getElementById('modalFeeStatus').value;
         }
       } else {
-        // Create new student
-        const newId = 'STU-' + (1000 + students.length + 1);
+        // Create new student — assign the next sequential ID after the
+        // highest existing one so IDs never collide (even after deletions).
+        let maxIdNum = 1000;
+        students.forEach(s => {
+          const match = (s.id || '').match(/STU-(\d+)/i);
+          if (match) {
+            const num = parseInt(match[1], 10);
+            if (num > maxIdNum) maxIdNum = num;
+          }
+        });
+        const newId = 'STU-' + (maxIdNum + 1);
         students.push({
           id: newId,
           name: document.getElementById('modalStudentName').value.trim(),
@@ -2832,6 +2905,8 @@ function setupEventListeners() {
   if (exportStudentsBtn && !exportStudentsBtn.onclick) {
     exportStudentsBtn.addEventListener('click', () => window.exportStudentsToCsv?.());
   }
+
+  document.getElementById('resequenceStudentIdsBtn')?.addEventListener('click', window.resequenceStudentIds);
 
   document.getElementById('exportInquiriesCsvBtn')?.addEventListener('click', () => {
     const inquiries = AcademyDB.getInquiries();
