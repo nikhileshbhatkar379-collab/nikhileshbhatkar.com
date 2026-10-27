@@ -1060,7 +1060,18 @@ function renderAttendanceTable() {
     return;
   }
 
-  tbody.innerHTML = students.map(s => {
+  // Standard filter
+  const filter = document.getElementById('attendanceStandardFilter')?.value || 'all';
+  const filteredStudents = filter === 'all'
+    ? students
+    : students.filter(s => s.standard === filter);
+
+  if (filteredStudents.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center">No students found for ${filter}.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filteredStudents.map(s => {
     const a = attendance.find(x => x.studentId === s.id);
     if (!a) {
       // No attendance record yet — show as not-yet-marked
@@ -2027,6 +2038,7 @@ function setupEventListeners() {
 
   document.getElementById('testSearchInput')?.addEventListener('input', renderTestsTable);
   document.getElementById('testStandardFilter')?.addEventListener('change', renderTestsTable);
+  document.getElementById('attendanceStandardFilter')?.addEventListener('change', renderAttendanceTable);
   document.getElementById('doubtStatusFilter')?.addEventListener('change', renderDoubtsManager);
 
   // -----------------------------------------------------------
