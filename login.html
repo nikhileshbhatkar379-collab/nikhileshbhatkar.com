@@ -97,10 +97,6 @@
           <input type="password" id="adminPassword" name="admin_password" placeholder="Enter password" required autocomplete="current-password">
         </div>
 
-        <p id="facultyLoginHint" style="display:none; font-size:0.85rem; color:#059669; margin-top:8px;">
-          👨‍🏫 <strong>Faculty Login:</strong> Use <code>amit</code> / <code>amit123</code> for Faculty Panel access (marks, attendance, notes, papers).
-        </p>
-
         <button type="submit" class="btn-login-submit btn-admin-submit" data-i18n="login_btn_admin">Login to Dashboard →</button>
       </form>
 
@@ -156,9 +152,6 @@
 
           adminForm.style.display = 'block';
           studentForm.style.display = 'none';
-          // Show faculty hint
-          const facultyHint = document.getElementById('facultyLoginHint');
-          if (facultyHint) facultyHint.style.display = 'block';
         } else {
           tabAdmin.classList.add('active');
           tabAdmin.setAttribute('aria-selected', 'true');
@@ -169,8 +162,6 @@
 
           adminForm.style.display = 'block';
           studentForm.style.display = 'none';
-          const facultyHint = document.getElementById('facultyLoginHint');
-          if (facultyHint) facultyHint.style.display = 'none';
         }
       }
 
