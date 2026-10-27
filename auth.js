@@ -25,6 +25,7 @@ const DEFAULT_STUDENTS = [
     parentPhone: '9822110045',
     feeStatus: 'Paid',
     enrolledDate: '2026-06-15',
+    monthlyFee: 3000,
     role: 'student'
   },
   {
@@ -38,6 +39,7 @@ const DEFAULT_STUDENTS = [
     parentPhone: '9890223345',
     feeStatus: 'Paid',
     enrolledDate: '2026-06-20',
+    monthlyFee: 4000,
     role: 'student'
   },
   {
@@ -51,6 +53,7 @@ const DEFAULT_STUDENTS = [
     parentPhone: '9765432101',
     feeStatus: 'Pending',
     enrolledDate: '2026-07-01',
+    monthlyFee: 2500,
     role: 'student'
   },
   {
@@ -64,6 +67,7 @@ const DEFAULT_STUDENTS = [
     parentPhone: '9423887767',
     feeStatus: 'Paid',
     enrolledDate: '2026-07-10',
+    monthlyFee: 2000,
     role: 'student'
   },
   {
@@ -77,6 +81,7 @@ const DEFAULT_STUDENTS = [
     parentPhone: '8380091123',
     feeStatus: 'Paid',
     enrolledDate: '2026-08-01',
+    monthlyFee: 5000,
     role: 'student'
   }
 ];

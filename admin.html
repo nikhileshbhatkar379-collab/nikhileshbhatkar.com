@@ -1046,7 +1046,7 @@
 
   <!-- Add Receipt Modal -->
   <div id="receiptModal" class="modal-overlay" style="display:none;">
-    <div class="modal-card">
+    <div class="modal-card" style="max-width:600px;">
       <div class="modal-header">
         <h3>Record Fee Payment</h3>
         <button class="modal-close" onclick="document.getElementById('receiptModal').style.display='none'">&times;</button>
@@ -1054,16 +1054,34 @@
       <form id="receiptModalForm" class="modal-form">
         <div class="form-group">
           <label for="modalReceiptStudent">Student <span class="required">*</span></label>
-          <select id="modalReceiptStudent" required></select>
+          <select id="modalReceiptStudent" required onchange="updateReceiptStudentInfo()"></select>
         </div>
+
+        <!-- Student fee info display -->
+        <div id="receiptStudentInfo" style="display:none;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:12px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.9rem;">
+            <div><strong>Monthly Fee:</strong> <span id="rcptMonthlyFee">₹0</span></div>
+            <div><strong>Total Paid:</strong> <span id="rcptTotalPaid">₹0</span></div>
+            <div><strong>Total Expected:</strong> <span id="rcptTotalExpected">₹0</span></div>
+            <div><strong>Balance:</strong> <span id="rcptBalance" style="color:#dc2626;font-weight:bold;">₹0</span></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="modalReceiptPeriod">Payment Period / Month <span class="required">*</span></label>
+          <select id="modalReceiptPeriod" required>
+            <option value="">Select Month</option>
+            <!-- Populated dynamically -->
+          </select>
+          <small style="color:#647489;">Choose the month/period this payment covers</small>
+        </div>
+
         <div class="form-group">
           <label for="modalReceiptAmount">Amount (₹) <span class="required">*</span></label>
-          <input type="number" id="modalReceiptAmount" placeholder="e.g. 1000" required>
+          <input type="number" id="modalReceiptAmount" placeholder="e.g. 3000" required min="1">
+          <small style="color:#647489;">Monthly fee: <span id="rcptSuggestedAmount" style="font-weight:bold;">₹0</span></small>
         </div>
-        <div class="form-group">
-          <label for="modalReceiptTerm">Payment Term / Description <span class="required">*</span></label>
-          <input type="text" id="modalReceiptTerm" placeholder="e.g. Month of October 2026" required>
-        </div>
+
         <div class="form-group">
           <label for="modalReceiptMode">Payment Mode</label>
           <select id="modalReceiptMode">
@@ -1073,21 +1091,24 @@
             <option value="UPI (BHIM)">UPI (BHIM)</option>
             <option value="Cash">Cash</option>
             <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Cheque">Cheque</option>
           </select>
         </div>
         <div class="form-group">
           <label for="modalReceiptTxnId">Transaction / Reference ID</label>
-          <input type="text" id="modalReceiptTxnId" placeholder="e.g. UPI/261001/982211">
+          <input type="text" id="modalReceiptTxnId" placeholder="e.g. UPI/261001/982211 or Cheque #123456">
+        </div>
+        <div class="form-group">
+          <label for="modalReceiptRemarks">Remarks (Optional)</label>
+          <textarea id="modalReceiptRemarks" rows="2" placeholder="e.g. Part payment, Late fee waived, etc."></textarea>
         </div>
         <div class="modal-actions">
-          <button type="submit" class="btn-primary">Save Receipt &amp; Mark Paid</button>
+          <button type="submit" class="btn-primary">Save Receipt & Generate PDF</button>
           <button type="button" class="btn-secondary" onclick="document.getElementById('receiptModal').style.display='none'">Cancel</button>
         </div>
       </form>
     </div>
-  </div>
-
-  <!-- Add Topper Modal -->
+  </div><!-- Add Topper Modal -->
   <div id="topperModal" class="modal-overlay" style="display:none;">
     <div class="modal-card">
       <div class="modal-header">

@@ -382,6 +382,7 @@ window.openEditStudentModal = function(studentId) {
   document.getElementById('modalParentName').value = student.parentName || '';
   document.getElementById('modalParentPhone').value = student.parentPhone || '';
   document.getElementById('modalFeeStatus').value = student.feeStatus || 'Paid';
+  document.getElementById('modalMonthlyFee').value = student.monthlyFee || 0;
 
   document.getElementById('studentModal').style.display = 'flex';
 };
@@ -1054,8 +1055,182 @@ window.printStudentReportCard = function(studentId) {
 };
 
 // -------------------------------------------------------------
-// 8. ATTENDANCE TRACKER
+// FEE RECEIPT HELPERS
 // -------------------------------------------------------------
+
+window.updateReceiptStudentInfo = function() {
+  const select = document.getElementById('modalReceiptStudent');
+  if (!select || !select.value) return;
+
+  const [studentId, studentName, parentName, standard] = select.value.split('|');
+  const students = AcademyDB.getStudents();
+  const student = students.find(s => s.id === studentId);
+  const receipts = AcademyDB.getReceipts() || [];
+
+  if (!student) return;
+
+  const studentReceipts = receipts.filter(r => r.studentId === studentId);
+  const totalPaid = studentReceipts.reduce((sum, r) => sum + (r.amount || 0), 0);
+  const monthlyFee = student.monthlyFee || 0;
+
+  // Calculate months enrolled
+  const enrolledDate = student.enrolledDate ? new Date(student.enrolledDate) : new Date();
+  const monthsEnrolled = Math.max(1, (new Date().getFullYear() - enrolledDate.getFullYear()) * 12 + new Date().getMonth() - enrolledDate.getMonth() + 1);
+  const totalExpected = monthlyFee * monthsEnrolled;
+  const balance = totalExpected - totalPaid;
+
+  // Populate period dropdown
+  const periodSelect = document.getElementById('modalReceiptPeriod');
+  if (periodSelect) {
+    periodSelect.innerHTML = '<option value="">Select Month</option>';
+    // Generate months from enrollment to current
+    const startYear = enrolledDate.getFullYear();
+    const startMonth = enrolledDate.getMonth();
+    const endDate = new Date();
+    for (let y = startYear; y <= endDate.getFullYear(); y++) {
+      const mStart = (y === startYear) ? startMonth : 0;
+      const mEnd = (y === endDate.getFullYear()) ? endDate.getMonth() : 11;
+      for (let m = mStart; m <= mEnd; m++) {
+        const date = new Date(y, m, 1);
+        const value = date.toISOString().split('T')[0].substring(0, 7); // YYYY-MM
+        const label = date.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = label;
+        // Pre-select current month if not already paid
+        const alreadyPaid = studentReceipts.some(r => r.period === value);
+        if (!alreadyPaid && y === endDate.getFullYear() && m === endDate.getMonth()) {
+          option.selected = true;
+        }
+        periodSelect.appendChild(option);
+      }
+    }
+  }
+
+  // Update display
+  document.getElementById('rcptMonthlyFee').textContent = '₹' + monthlyFee.toLocaleString('en-IN');
+  document.getElementById('rcptTotalPaid').textContent = '₹' + totalPaid.toLocaleString('en-IN');
+  document.getElementById('rcptTotalExpected').textContent = '₹' + totalExpected.toLocaleString('en-IN');
+  document.getElementById('rcptBalance').textContent = '₹' + balance.toLocaleString('en-IN');
+  document.getElementById('rcptSuggestedAmount').textContent = '₹' + monthlyFee.toLocaleString('en-IN');
+
+  // Show/hide info box
+  document.getElementById('receiptStudentInfo').style.display = monthlyFee > 0 ? 'block' : 'none';
+};
+
+window.printFeeReceipt = function(receipt) {
+  const students = AcademyDB.getStudents();
+  const student = students.find(s => s.id === receipt.studentId);
+  const studentReceipts = (AcademyDB.getReceipts() || []).filter(r => r.studentId === receipt.studentId);
+  const totalPaid = studentReceipts.reduce((sum, r) => sum + (r.amount || 0), 0);
+  const monthlyFee = student?.monthlyFee || 0;
+  const enrolledDate = student?.enrolledDate ? new Date(student.enrolledDate) : new Date();
+  const monthsEnrolled = Math.max(1, (new Date().getFullYear() - enrolledDate.getFullYear()) * 12 + new Date().getMonth() - enrolledDate.getMonth() + 1);
+  const totalExpected = monthlyFee * monthsEnrolled;
+  const balance = totalExpected - totalPaid;
+
+  // Format period for display
+  const periodDate = new Date(receipt.period + '-01');
+  const periodLabel = periodDate.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+
+  const printArea = document.getElementById('printReceiptContent');
+  if (!printArea) return;
+
+  printArea.innerHTML = `
+    <div class="printable-receipt" style="font-family:Arial,sans-serif;max-width:400px;margin:0 auto;padding:20px;">
+      <!-- Header -->
+      <div style="text-align:center;border-bottom:2px solid #1e3c72;padding-bottom:15px;margin-bottom:15px;">
+        <h2 style="margin:0;color:#1e3c72;font-size:1.5rem;">🏛️ NIKHILLESH BHATKAR LEARNING ACADEMY</h2>
+        <p style="margin:4px 0 0;color:#555;font-size:0.85rem;">Near S.T. Stand, Sangameshwar, Dist. Ratnagiri — 415611</p>
+        <p style="margin:2px 0 0;color:#555;font-size:0.8rem;">Contact: +91 83800 96494</p>
+        <hr style="margin:10px 0;border-color:#1e3c72;">
+        <h3 style="margin:0;text-transform:uppercase;letter-spacing:1px;color:#1e3c72;font-size:1rem;">Fee Receipt</h3>
+      </div>
+
+      <!-- Receipt Info -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;margin-bottom:15px;">
+        <div><strong>Receipt No:</strong> ${receipt.receiptNo}</div>
+        <div style="text-align:right;"><strong>Date:</strong> ${new Date(receipt.date).toLocaleDateString('en-IN')}</div>
+        <div><strong>Period:</strong> ${periodLabel}</div>
+        <div style="text-align:right;"><strong>Mode:</strong> ${receipt.paymentMode}</div>
+        ${receipt.transactionId ? `<div><strong>Ref:</strong> ${receipt.transactionId}</div>` : ''}
+        <div style="text-align:right;"><strong>Collected By:</strong> ${receipt.collectedBy}</div>
+      </div>
+
+      <!-- Student Info -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:15px;">
+        <div style="font-weight:bold;color:#1e3c72;margin-bottom:8px;">👨‍🎓 Student Details</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.85rem;">
+          <div><strong>Name:</strong> ${student?.name || receipt.studentName}</div>
+          <div><strong>ID:</strong> ${receipt.studentId}</div>
+          <div><strong>Standard:</strong> ${receipt.standard}</div>
+          <div><strong>Parent:</strong> ${receipt.parentName}</div>
+          <div><strong>Monthly Fee:</strong> ₹${monthlyFee.toLocaleString('en-IN')}</div>
+        </div>
+      </div>
+
+      <!-- Payment Details -->
+      <table style="width:100%;border-collapse:collapse;font-size:0.85rem;margin-bottom:15px;">
+        <thead>
+          <tr style="background:#1e3c72;color:white;">
+            <th style="border:1px solid #ccc;padding:8px;text-align:left;">Description</th>
+            <th style="border:1px solid #ccc;padding:8px;text-align:center;">Amount (₹)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="border:1px solid #ccc;padding:8px;">Fee for ${periodLabel}</td>
+            <td style="border:1px solid #ccc;padding:8px;text-align:center;font-weight:bold;">${receipt.amount.toLocaleString('en-IN')}</td>
+          </tr>
+          ${receipt.remarks ? `<tr><td style="border:1px solid #ccc;padding:8px;font-size:0.8rem;">Remarks: ${receipt.remarks}</td><td style="border:1px solid #ccc;padding:8px;"></td></tr>` : ''}
+        </tbody>
+        <tfoot>
+          <tr style="background:#f0f4f8;font-weight:bold;">
+            <td style="border:1px solid #ccc;padding:8px;text-align:right;">TOTAL PAID THIS RECEIPT:</td>
+            <td style="border:1px solid #ccc;padding:8px;text-align:center;color:#27ae60;">₹${receipt.amount.toLocaleString('en-IN')}</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <!-- Running Balance Summary -->
+      <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:12px;margin-bottom:15px;">
+        <div style="font-weight:bold;color:#0369a1;margin-bottom:8px;">📊 Fee Summary (Running Balance)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.85rem;">
+          <div><strong>Monthly Fee:</strong></div><div style="text-align:right;">₹${monthlyFee.toLocaleString('en-IN')}</div>
+          <div><strong>Months Enrolled:</strong></div><div style="text-align:right;">${monthsEnrolled}</div>
+          <div><strong>Total Expected:</strong></div><div style="text-align:right;">₹${totalExpected.toLocaleString('en-IN')}</div>
+          <div><strong>Total Paid (incl. this):</strong></div><div style="text-align:right;color:#27ae60;">₹${totalPaid.toLocaleString('en-IN')}</div>
+          <div style="grid-column:1/-1;"><hr style="margin:8px 0;border-color:#bae6fd;"></div>
+          <div style="font-weight:bold;"><strong>Balance Due:</strong></div>
+          <div style="text-align:right;font-weight:bold;color:${balance > 0 ? '#dc2626' : '#27ae60'};">₹${balance.toLocaleString('en-IN')} ${balance > 0 ? '(Pending)' : '(Paid in Full)'}</div>
+        </div>
+      </div>
+
+      ${receipt.remarks ? `
+      <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:10px;margin-bottom:15px;font-size:0.8rem;">
+        <strong>Remarks:</strong> ${receipt.remarks}
+      </div>` : ''}
+
+      <!-- Signatures -->
+      <div style="display:flex;justify-content:space-between;margin-top:30px;padding-top:15px;border-top:1px dashed #ccc;font-size:0.8rem;">
+        <div style="text-align:center;">
+          <div style="border-top:1px solid #333;width:150px;margin:0 auto;"></div>
+          <div style="margin-top:4px;">Parent / Guardian Signature</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="border-top:1px solid #333;width:150px;margin:0 auto;"></div>
+          <div style="margin-top:4px;">Authorized Signatory<br><small>Nikhillesh Bhatkar Academy</small></div>
+        </div>
+      </div>
+
+      <div style="text-align:center;margin-top:15px;font-size:0.7rem;color:#888;">
+        This is a computer-generated receipt. No signature required for digital payments.
+      </div>
+    </div>
+  `;
+
+  document.getElementById('printReceiptModal').style.display = 'flex';
+};
 function renderAttendanceTable() {
   const tbody = document.getElementById('attendanceTableBody');
   if (!tbody) return;
@@ -1306,6 +1481,16 @@ window.openAddReceiptModal = function() {
       <option value="${s.id}|${s.name}|${s.parentName || ''}|${s.standard}">${s.name} (${s.standard} - ${s.id})</option>
     `).join('');
   }
+  // Reset form
+  const form = document.getElementById('receiptModalForm');
+  if (form) form.reset();
+  // Hide student info box initially
+  document.getElementById('receiptStudentInfo').style.display = 'none';
+  // Reset period dropdown
+  const periodSelect = document.getElementById('modalReceiptPeriod');
+  if (periodSelect) periodSelect.innerHTML = '<option value="">Select Month</option>';
+  document.getElementById('rcptSuggestedAmount').textContent = '₹0';
+
   document.getElementById('receiptModal').style.display = 'flex';
 };
 
@@ -2406,6 +2591,7 @@ function setupEventListeners() {
           student.parentName = document.getElementById('modalParentName').value.trim();
           student.parentPhone = document.getElementById('modalParentPhone').value.trim();
           student.feeStatus = document.getElementById('modalFeeStatus').value;
+          student.monthlyFee = Number(document.getElementById('modalMonthlyFee').value) || 0;
         }
       } else {
         // Create new student — assign the next sequential ID after the
@@ -2428,6 +2614,7 @@ function setupEventListeners() {
           parentName: document.getElementById('modalParentName').value.trim(),
           parentPhone: document.getElementById('modalParentPhone').value.trim(),
           feeStatus: document.getElementById('modalFeeStatus').value,
+          monthlyFee: Number(document.getElementById('modalMonthlyFee').value) || 0,
           enrolledDate: new Date().toISOString().split('T')[0],
           role: 'student'
         });
@@ -2660,31 +2847,53 @@ function setupEventListeners() {
       const parentName = studentRaw[2];
       const standard = studentRaw[3];
 
+      const students = AcademyDB.getStudents();
+      const student = students.find(s => s.id === studentId);
       const receipts = AcademyDB.getReceipts() || [];
-      const newReceiptNo = 'REC-2026-' + (100 + receipts.length + 1);
 
-      receipts.push({
+      const period = document.getElementById('modalReceiptPeriod').value;
+      const amount = Number(document.getElementById('modalReceiptAmount').value);
+      const paymentMode = document.getElementById('modalReceiptMode').value;
+      const transactionId = document.getElementById('modalReceiptTxnId').value.trim() || `UPI/${Date.now().toString().slice(-6)}`;
+      const remarks = document.getElementById('modalReceiptRemarks').value.trim();
+
+      // Calculate totals
+      const studentReceipts = receipts.filter(r => r.studentId === studentId);
+      const totalPaid = studentReceipts.reduce((sum, r) => sum + (r.amount || 0), 0) + amount;
+      const monthlyFee = student?.monthlyFee || 0;
+      const enrolledDate = student?.enrolledDate ? new Date(student.enrolledDate) : new Date();
+      const monthsEnrolled = Math.max(1, (new Date().getFullYear() - enrolledDate.getFullYear()) * 12 + new Date().getMonth() - enrolledDate.getMonth() + 1);
+      const totalExpected = monthlyFee * monthsEnrolled;
+      const balance = totalExpected - totalPaid;
+
+      const newReceiptNo = 'REC-' + new Date().getFullYear() + '-' + String(receipts.length + 101).padStart(3, '0');
+
+      const newReceipt = {
         receiptNo: newReceiptNo,
         studentId,
         studentName,
         parentName,
         standard,
-        amount: Number(document.getElementById('modalReceiptAmount').value),
-        term: document.getElementById('modalReceiptTerm').value.trim(),
-        paymentMode: document.getElementById('modalReceiptMode').value,
-        transactionId: document.getElementById('modalReceiptTxnId').value.trim() || `UPI/${Date.now().toString().slice(-6)}`,
+        amount,
+        period,
+        paymentMode,
+        transactionId,
+        remarks,
         date: new Date().toISOString().split('T')[0],
         status: 'Completed',
-        collectedBy: 'Nikhillesh Bhatkar'
-      });
+        collectedBy: 'Nikhillesh Bhatkar',
+        monthlyFee,
+        totalPaid,
+        totalExpected,
+        balance
+      };
 
+      receipts.push(newReceipt);
       AcademyDB.saveReceipts(receipts);
 
-      // Also mark student fee status as Paid
-      const students = AcademyDB.getStudents();
-      const stu = students.find(s => s.id === studentId);
+      // Update student fee status based on balance
       if (stu) {
-        stu.feeStatus = 'Paid';
+        stu.feeStatus = balance <= 0 ? 'Paid' : 'Pending';
         AcademyDB.saveStudents(students);
         renderStudentsTable();
       }
@@ -2692,7 +2901,11 @@ function setupEventListeners() {
       document.getElementById('receiptModal').style.display = 'none';
       receiptForm.reset();
       renderReceiptsTable();
-      alert('✅ Fee receipt generated & student status marked Paid!');
+
+      // Auto-open print receipt
+      printFeeReceipt(newReceipt);
+
+      alert(`✅ Fee receipt ${newReceiptNo} generated for ${studentName}!`);
     });
   }
 
