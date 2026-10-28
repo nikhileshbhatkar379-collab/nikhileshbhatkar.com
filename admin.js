@@ -101,10 +101,6 @@ function initAdminPortal() {
       window.switchAdminTab('tab-notes');
       openAddNoteModal();
     });
-    document.getElementById('quickAddPaperBtn')?.addEventListener('click', () => {
-      window.switchAdminTab('tab-papers');
-      openAddPaperModal();
-    });
     document.getElementById('quickAddNoticeBtn')?.addEventListener('click', () => {
       window.switchAdminTab('tab-notices');
     });
@@ -113,10 +109,6 @@ function initAdminPortal() {
     document.getElementById('quickAddNoteBtn')?.addEventListener('click', () => {
       window.switchAdminTab('tab-notes');
       openAddNoteModal();
-    });
-    document.getElementById('quickAddPaperBtn')?.addEventListener('click', () => {
-      window.switchAdminTab('tab-papers');
-      openAddPaperModal();
     });
     document.getElementById('quickAddDoubtsBtn')?.addEventListener('click', () => {
       window.switchAdminTab('tab-doubts');
@@ -189,7 +181,6 @@ function loadAllAdminData() {
 function renderOverviewStats() {
   const students = AcademyDB.getStudents();
   const notes = AcademyDB.getNotes();
-  const papers = AcademyDB.getPapers() || [];
   const notices = AcademyDB.getNotices();
   const inquiries = AcademyDB.getInquiries();
   const timetable = AcademyDB.getTimetable() || [];
@@ -199,9 +190,6 @@ function renderOverviewStats() {
 
   const totalNotesEl = document.getElementById('statTotalNotes');
   if (totalNotesEl) totalNotesEl.textContent = notes.length;
-
-  const paperStatEl = document.getElementById('statTotalPapers');
-  if (paperStatEl) paperStatEl.textContent = papers.length;
 
   const statBatchesEl = document.getElementById('statTotalBatches');
   if (statBatchesEl) statBatchesEl.textContent = timetable.length;

@@ -38,8 +38,7 @@
           <li><button class="nav-item active" data-tab="tab-overview">📊 Dashboard Overview</button></li>
           <li><button class="nav-item" data-tab="tab-students">👨‍🎓 Student Management</button></li>
           <li><button class="nav-item" data-tab="tab-notes">📚 Notes &amp; Formulas</button></li>
-          <li><button class="nav-item" data-tab="tab-papers">📝 Board Question Papers</button></li>
-          <li><button class="nav-item" data-tab="tab-notices">📢 Notice Board &amp; Alerts</button></li>
+                    <li><button class="nav-item" data-tab="tab-notices">📢 Notice Board &amp; Alerts</button></li>
           <li><button class="nav-item" data-tab="tab-inquiries">📥 Inquiries &amp; Demo Leads</button></li>
           <li><button class="nav-item" data-tab="tab-settings">⚙️ Settings &amp; Backup</button></li>
           <li><button class="nav-item" data-tab="tab-tests">📈 Test Marks &amp; Reports</button></li>
@@ -67,7 +66,6 @@
           <div class="quick-actions">
             <button class="btn-primary" id="quickAddStudentBtn">+ Add Student</button>
             <button class="btn-primary" id="quickAddNoteBtn">+ Upload Note</button>
-            <button class="btn-primary" id="quickAddPaperBtn">+ Upload Paper</button>
             <button class="btn-primary" id="quickAddTimetableBtn" onclick="window.switchAdminTab('tab-timetable'); openTimetableModal(-1);">+ Add Timetable Entry</button>
             <button class="btn-primary" id="quickAddNoticeBtn">+ Post Notice</button>
           </div>
@@ -87,13 +85,6 @@
             <div class="metric-info">
               <span class="metric-label">Study Notes &amp; Formulas</span>
               <h3 id="statTotalNotes">9</h3>
-            </div>
-          </div>
-          <div class="metric-card" onclick="window.switchAdminTab('tab-papers')" style="cursor:pointer;" title="View Papers">
-            <div class="metric-icon">📝</div>
-            <div class="metric-info">
-              <span class="metric-label">Board Papers &amp; PYQs</span>
-              <h3 id="statTotalPapers">14</h3>
             </div>
           </div>
           <div class="metric-card" onclick="window.switchAdminTab('tab-timetable')" style="cursor:pointer;" title="View Timetable">
@@ -250,47 +241,27 @@
       <section id="tab-papers" class="admin-tab-content">
         <div class="section-title-row">
           <div>
-            <h2>📝 Maharashtra Board Question Papers &amp; Solutions</h2>
+            <h2>📝 Maharashtra Board Question Papers & Solutions</h2>
             <p class="section-subtitle">Upload past board question papers, prelim models, and answer keys</p>
           </div>
           <button class="btn-primary" id="openAddPaperModalBtn" onclick="openAddPaperModal()">📤 Upload New Question Paper</button>
         </div>
-
-        <!-- Papers Filter -->
-        <div class="table-filter-bar">
-          <input type="text" id="paperSearchInput" placeholder="🔍 Search papers by year, subject, type, or title...">
-          <select id="paperStandardFilter">
-            <option value="all">All Standards</option>
-            <option value="Standard 10 (SSC)">Standard 10 (SSC)</option>
-            <option value="Standard 12 (HSC)">Standard 12 (HSC)</option>
-            <option value="Standard 9">Standard 9</option>
-            <option value="Standard 8">Standard 8</option>
-            <option value="Special: Stock Market">Stock Market</option>
-            <option value="Special: AI & Generative AI">AI Mastery</option>
-          </select>
-          <select id="paperTypeFilter">
-            <option value="all">All Paper Categories</option>
-            <option value="Board PYQ">Board PYQ (Past Exam)</option>
-            <option value="Model Paper">Model Paper / Mock</option>
-            <option value="SCERT Question Bank">SCERT Question Bank</option>
-          </select>
-        </div>
-
-        <!-- Papers Table -->
         <div class="table-responsive">
           <table class="data-table">
             <thead>
               <tr>
-                <th>Title &amp; Subject</th>
+                <th>Title & Subject</th>
                 <th>Standard</th>
                 <th>Year / Session</th>
                 <th>Type</th>
                 <th>Marks</th>
-                <th>Document &amp; Key</th>
+                <th>Document & Key</th>
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody id="papersTableBody"></tbody>
+            <tbody id="papersTableBody">
+              <tr><td colspan="7" class="text-center">No board question papers yet. Click "Upload New Question Paper" to add one.</td></tr>
+            </tbody>
           </table>
         </div>
       </section>
