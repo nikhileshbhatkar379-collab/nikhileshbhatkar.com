@@ -2892,8 +2892,8 @@ function setupEventListeners() {
       AcademyDB.saveReceipts(receipts);
 
       // Update student fee status based on balance
-      if (stu) {
-        stu.feeStatus = balance <= 0 ? 'Paid' : 'Pending';
+      if (student) {
+        student.feeStatus = balance <= 0 ? 'Paid' : 'Pending';
         AcademyDB.saveStudents(students);
         renderStudentsTable();
       }
