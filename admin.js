@@ -1046,6 +1046,37 @@ window.printStudentReportCard = function(studentId) {
 // FEE RECEIPT HELPERS
 // -------------------------------------------------------------
 
+// Shared fee-balance calculation with safety guards.
+// Prevents absurd "lakh" balances caused by a bad enrollment date
+// or a monthly fee that was accidentally entered as an annual amount.
+function computeFeeBalance(monthlyFee, enrolledDate, totalPaid) {
+  const fee = Number(monthlyFee) || 0;
+  const paid = Number(totalPaid) || 0;
+
+  // No fee recorded -> nothing is owed
+  if (fee <= 0) {
+    return { monthsEnrolled: 0, totalExpected: 0, balance: 0 };
+  }
+
+  const now = new Date();
+  const enrolled = enrolledDate ? new Date(enrolledDate) : now;
+  let months = (now.getFullYear() - enrolled.getFullYear()) * 12
+              + (now.getMonth() - enrolled.getMonth()) + 1;
+
+  // Guard against NaN / negative / absurd values
+  if (!isFinite(months) || months < 0) months = 0;
+  if (months > 60) months = 60; // hard cap of 5 years
+
+  const totalExpected = fee * months;
+  const balance = totalExpected - paid;
+
+  return {
+    monthsEnrolled: months,
+    totalExpected: totalExpected,
+    balance: Math.max(0, balance) // never show a negative "pending"
+  };
+}
+
 window.updateReceiptStudentInfo = function() {
   const select = document.getElementById('modalReceiptStudent');
   if (!select || !select.value) return;
@@ -1061,11 +1092,9 @@ window.updateReceiptStudentInfo = function() {
   const totalPaid = studentReceipts.reduce((sum, r) => sum + (r.amount || 0), 0);
   const monthlyFee = student.monthlyFee || 0;
 
-  // Calculate months enrolled
+  // Calculate months enrolled (safely — guards against bad enrollment dates)
   const enrolledDate = student.enrolledDate ? new Date(student.enrolledDate) : new Date();
-  const monthsEnrolled = Math.max(1, (new Date().getFullYear() - enrolledDate.getFullYear()) * 12 + new Date().getMonth() - enrolledDate.getMonth() + 1);
-  const totalExpected = monthlyFee * monthsEnrolled;
-  const balance = totalExpected - totalPaid;
+  const { monthsEnrolled, totalExpected, balance } = computeFeeBalance(monthlyFee, enrolledDate, totalPaid);
 
   // Populate period dropdown
   const periodSelect = document.getElementById('modalReceiptPeriod');
@@ -1113,9 +1142,7 @@ window.printFeeReceipt = function(receipt) {
   const totalPaid = studentReceipts.reduce((sum, r) => sum + (r.amount || 0), 0);
   const monthlyFee = student?.monthlyFee || 0;
   const enrolledDate = student?.enrolledDate ? new Date(student.enrolledDate) : new Date();
-  const monthsEnrolled = Math.max(1, (new Date().getFullYear() - enrolledDate.getFullYear()) * 12 + new Date().getMonth() - enrolledDate.getMonth() + 1);
-  const totalExpected = monthlyFee * monthsEnrolled;
-  const balance = totalExpected - totalPaid;
+  const { monthsEnrolled, totalExpected, balance } = computeFeeBalance(monthlyFee, enrolledDate, totalPaid);
 
   // Format period for display
   const periodDate = new Date(receipt.period + '-01');
@@ -2850,9 +2877,7 @@ function setupEventListeners() {
       const totalPaid = studentReceipts.reduce((sum, r) => sum + (r.amount || 0), 0) + amount;
       const monthlyFee = student?.monthlyFee || 0;
       const enrolledDate = student?.enrolledDate ? new Date(student.enrolledDate) : new Date();
-      const monthsEnrolled = Math.max(1, (new Date().getFullYear() - enrolledDate.getFullYear()) * 12 + new Date().getMonth() - enrolledDate.getMonth() + 1);
-      const totalExpected = monthlyFee * monthsEnrolled;
-      const balance = totalExpected - totalPaid;
+      const { monthsEnrolled, totalExpected, balance } = computeFeeBalance(monthlyFee, enrolledDate, totalPaid);
 
       const newReceiptNo = 'REC-' + new Date().getFullYear() + '-' + String(receipts.length + 101).padStart(3, '0');
 
