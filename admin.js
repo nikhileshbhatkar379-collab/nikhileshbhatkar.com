@@ -4,6 +4,22 @@
 
 let adminListenersInitialized = false;
 
+// Generate the next fee-receipt number (REC-YYYY-NNN) from the highest
+// existing number rather than the count of receipts. Counting fails when
+// receipts are deleted: the array shrinks and the next number reuses an
+// old one, which then collides with the receipt that still exists.
+function nextReceiptNo(receipts) {
+  const year = new Date().getFullYear();
+  let maxSeq = 0;
+  (receipts || []).forEach(r => {
+    const m = String(r.receiptNo || '').match(/^REC-(\d{4})-(\d{3})$/);
+    if (m && Number(m[1]) === year) {
+      maxSeq = Math.max(maxSeq, Number(m[2]));
+    }
+  });
+  return 'REC-' + year + '-' + String(maxSeq + 1).padStart(3, '0');
+}
+
 function initAdminPortal() {
   // 1. Enforce Authentication (allows both 'admin' and 'faculty')
   const user = Auth.requireAuth('admin');
@@ -2894,7 +2910,7 @@ function setupEventListeners() {
       const enrolledDate = student?.enrolledDate ? new Date(student.enrolledDate) : new Date();
       const { monthsEnrolled, totalExpected, balance } = computeFeeBalance(monthlyFee, enrolledDate, totalPaid);
 
-      const newReceiptNo = 'REC-' + new Date().getFullYear() + '-' + String(receipts.length + 101).padStart(3, '0');
+      const newReceiptNo = nextReceiptNo(receipts);
 
       const newReceipt = {
         receiptNo: newReceiptNo,
