@@ -310,6 +310,10 @@ window.openAddStudentModal = function() {
   const feeStatusInput = document.getElementById('modalFeeStatus');
   if (feeStatusInput) feeStatusInput.value = 'Paid';
 
+  // Default enrolled date to today for new students
+  const enrolledDateInput = document.getElementById('modalEnrolledDate');
+  if (enrolledDateInput) enrolledDateInput.value = new Date().toISOString().split('T')[0];
+
   const modal = document.getElementById('studentModal');
   if (modal) modal.style.display = 'flex';
 };
@@ -371,6 +375,7 @@ window.openEditStudentModal = function(studentId) {
   document.getElementById('modalParentPhone').value = student.parentPhone || '';
   document.getElementById('modalFeeStatus').value = student.feeStatus || 'Paid';
   document.getElementById('modalMonthlyFee').value = student.monthlyFee || 0;
+  document.getElementById('modalEnrolledDate').value = student.enrolledDate || new Date().toISOString().split('T')[0];
 
   document.getElementById('studentModal').style.display = 'flex';
 };
@@ -2599,6 +2604,7 @@ function setupEventListeners() {
         // Edit existing student
         const student = students.find(s => s.id === studentId);
         if (student) {
+          const newEnrolledDate = document.getElementById('modalEnrolledDate').value;
           student.name = document.getElementById('modalStudentName').value.trim();
           student.standard = document.getElementById('modalStudentStandard').value;
           student.phone = document.getElementById('modalStudentPhone').value.trim();
@@ -2607,6 +2613,15 @@ function setupEventListeners() {
           student.parentPhone = document.getElementById('modalParentPhone').value.trim();
           student.feeStatus = document.getElementById('modalFeeStatus').value;
           student.monthlyFee = Number(document.getElementById('modalMonthlyFee').value) || 0;
+          student.enrolledDate = newEnrolledDate || new Date().toISOString().split('T')[0];
+
+          // Recompute fee status from the corrected balance rather than
+          // trusting the manually-selected dropdown value.
+          const receipts = AcademyDB.getReceipts() || [];
+          const paid = receipts.filter(r => r.studentId === studentId)
+                               .reduce((sum, r) => sum + (r.amount || 0), 0);
+          const { balance } = computeFeeBalance(student.monthlyFee, student.enrolledDate, paid);
+          student.feeStatus = balance <= 0 ? 'Paid' : 'Pending';
         }
       } else {
         // Create new student — assign the next sequential ID after the
@@ -2630,7 +2645,7 @@ function setupEventListeners() {
           parentPhone: document.getElementById('modalParentPhone').value.trim(),
           feeStatus: document.getElementById('modalFeeStatus').value,
           monthlyFee: Number(document.getElementById('modalMonthlyFee').value) || 0,
-          enrolledDate: new Date().toISOString().split('T')[0],
+          enrolledDate: document.getElementById('modalEnrolledDate').value || new Date().toISOString().split('T')[0],
           role: 'student'
         });
       }
@@ -3452,6 +3467,32 @@ function importStudentsFromCSV(csvText) {
   renderWhatsAppStudentOptions();
   alert(`✅ Successfully imported students from CSV!\n\n• ${addedCount} student(s) added\n• ${updatedCount} student(s) updated\nTotal students in directory: ${existingStudents.length}`);
 }
+
+// -------------------------------------------------------------
+// Recompute every student's Pending/Paid status from their real balance
+// (used after correcting enrollment dates / monthly fees)
+// -------------------------------------------------------------
+window.recomputeAllFeeStatuses = function() {
+  const students = AcademyDB.getStudents() || [];
+  const receipts = AcademyDB.getReceipts() || [];
+  let changed = 0;
+
+  students.forEach(s => {
+    const paid = receipts.filter(r => r.studentId === s.id)
+                         .reduce((sum, r) => sum + (r.amount || 0), 0);
+    const { balance } = computeFeeBalance(s.monthlyFee, s.enrolledDate, paid);
+    const newStatus = balance <= 0 ? 'Paid' : 'Pending';
+    if (s.feeStatus !== newStatus) {
+      s.feeStatus = newStatus;
+      changed++;
+    }
+  });
+
+  AcademyDB.saveStudents(students);
+  renderStudentsTable();
+  renderOverviewStats();
+  alert(`✅ Recomputed fee statuses.\n\n• ${changed} student(s) changed\n• ${students.length - changed} already correct`);
+};
 
 // -------------------------------------------------------------
 // INITIALIZE ADMIN PORTAL (After all functions and handlers are defined)
