@@ -743,9 +743,33 @@ function renderStudentDoubts(user) {
   `).join('');
 }
 
+// Route a submitted doubt to the correct teacher based on the student's
+// standard and the subject they typed.
+//   • Standards 8, 9, 10  → Nikhillesh Sir
+//   • Standard 12 Physics & Chemistry → Amit Sir
+//   • Standard 12 Mathematics → Nikhillesh Sir
+function resolveDoubtTeacher(standard, subject) {
+  const std = String(standard || '').toLowerCase();
+  const subj = String(subject || '').toLowerCase();
+  const isHsc = std.includes('12');
+  const isAmitSubject = subj.includes('physics') || subj.includes('chemistry');
+  if (isHsc && isAmitSubject) return 'Amit Pawaskar Sir';
+  return 'Nikhillesh Bhatkar Sir';
+}
+
 function setupDoubtForm(user) {
   const form = document.getElementById('studentDoubtForm');
   if (!form) return;
+
+  const heading = document.getElementById('doubtSubmitTeacher');
+
+  // Update the form heading in real time as the student types the subject.
+  const subjectInput = document.getElementById('doubtSubjectInput');
+  if (subjectInput) {
+    subjectInput.addEventListener('input', () => {
+      if (heading) heading.textContent = resolveDoubtTeacher(user.standard, subjectInput.value);
+    });
+  }
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -755,6 +779,8 @@ function setupDoubtForm(user) {
     const question = document.getElementById('doubtQuestionInput').value.trim();
 
     if (!question) return;
+
+    const teacher = resolveDoubtTeacher(user.standard, subject);
 
     const newDoubt = {
       id: 'DBT-' + Date.now().toString().slice(-4),
@@ -767,7 +793,7 @@ function setupDoubtForm(user) {
       date: new Date().toISOString().split('T')[0],
       status: 'Pending',
       reply: '',
-      repliedBy: '',
+      repliedBy: teacher,
       replyDate: ''
     };
 
@@ -776,8 +802,9 @@ function setupDoubtForm(user) {
     AcademyDB.saveDoubts(doubts);
 
     form.reset();
+    if (heading) heading.textContent = 'Nikhillesh Bhatkar Sir';
     renderStudentDoubts(user);
-    alert('✅ Your doubt has been submitted to Nikhillesh Sir! You can review the reply right here once answered.');
+    alert(`✅ Your doubt has been submitted to ${teacher}! You can review the reply right here once answered.`);
   });
 }
 

@@ -1439,6 +1439,7 @@ function renderDoubtsManager() {
         <div>
           <span class="badge ${d.status === 'Pending' ? 'badge-pending' : 'badge-paid'}">${d.status === 'Pending' ? '⏳ Needs Answer' : '✅ Answered'}</span>
           <span class="badge badge-standard">${d.standard}</span>
+          <span class="badge" style="background:#fef3c7;color:#92400e;">👤 ${d.repliedBy || 'Nikhillesh Sir'}</span>
           <span style="font-weight:600;margin-left:6px;">${d.subject} • ${d.chapter}</span>
         </div>
         <small style="color:#888;">📅 ${d.date}</small>
