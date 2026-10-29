@@ -4,6 +4,9 @@
 
 let adminListenersInitialized = false;
 
+// Authority signature used on printed fee receipts and result reports.
+const AUTHORITY_SIGNATURE_SRC = '1718861699477.jpg';
+
 // Generate the next fee-receipt number (REC-YYYY-NNN) from the highest
 // existing number rather than the count of receipts. Counting fails when
 // receipts are deleted: the array shrinks and the next number reuses an
@@ -1055,7 +1058,10 @@ window.printStudentReportCard = function(studentId) {
       </div>
       <div class="receipt-signatures" style="display:flex;justify-content:space-between;margin-top:40px;padding-top:20px;border-top:1px dashed #ccc;">
         <div>___________________<br>Parent's Signature</div>
-        <div style="text-align:right;">___________________<br><strong>Nikhillesh Bhatkar</strong><br><small>Founder &amp; Head Educator</small></div>
+        <div style="text-align:right;">
+          <img src="${AUTHORITY_SIGNATURE_SRC}" alt="Authority signature" style="height:48px;width:auto;max-width:160px;object-fit:contain;vertical-align:middle;">
+          <br><strong>Nikhillesh Bhatkar</strong><br><small>Founder &amp; Head Educator</small>
+        </div>
       </div>
     </div>
   `;
@@ -1254,7 +1260,7 @@ window.printFeeReceipt = function(receipt) {
           <div style="margin-top:4px;">Parent / Guardian Signature</div>
         </div>
         <div style="text-align:center;">
-          <div style="border-top:1px solid #333;width:150px;margin:0 auto;"></div>
+          <img src="${AUTHORITY_SIGNATURE_SRC}" alt="Authority signature" style="height:44px;width:auto;max-width:150px;object-fit:contain;vertical-align:middle;">
           <div style="margin-top:4px;">Authorized Signatory<br><small>Nikhillesh Bhatkar Academy</small></div>
         </div>
       </div>
@@ -1599,7 +1605,8 @@ window.printReceipt = function(receiptNo) {
           <small>Thank you for your fee payment.<br>Keep this receipt for academic records.</small>
         </div>
         <div style="text-align:right;">
-          _________________________<br>
+          <img src="${AUTHORITY_SIGNATURE_SRC}" alt="Authority signature" style="height:44px;width:auto;max-width:150px;object-fit:contain;vertical-align:middle;">
+          <br>
           <strong>Authorised Signatory</strong><br>
           <small>Nikhillesh Bhatkar Learning Academy</small>
         </div>

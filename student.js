@@ -881,6 +881,7 @@ function printStudentReceipt(receiptNo) {
           Authorized Academy Seal
         </div>
         <div style="text-align:center;">
+          <img src="1718861699477.jpg" alt="Authority signature" style="height:44px;width:auto;max-width:180px;object-fit:contain;vertical-align:middle;">
           <div style="border-top:1.5px solid #333; width:200px; padding-top:6px; font-weight:bold; font-size:0.85rem;">
             Nikhillesh Bhatkar<br><span style="font-weight:normal;color:#64748b;">Founder &amp; Principal Educator</span>
           </div>
