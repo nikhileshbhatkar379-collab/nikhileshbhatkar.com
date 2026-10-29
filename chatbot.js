@@ -167,7 +167,7 @@
     if (/fee|fees|cost|price|paisa|rupee|charges|installment|फी|खर्च|पैसे|शुल्क|किस्त/i.test(raw)) {
       if (lang === 'mr') {
         return {
-          text: `💰 **निखिलेश भाटकर लर्निंग अकॅडमी - फी रचना:**\n\n• **इयत्ता ८ वी:** ₹८०० / महिना (१० महिने)\n• **इयत्ता ९ वी:** ₹९०० / महिना (१० महिने)\n• **इयत्ता १० वी (SSC):** ₹१,००० / महिना (१० महिने)\n• **इयत्ता १२ वी (HSC):** ₹५,००० / विषय (गणित / Physics / Chemistry)\n• **शेअर मार्केट कोर्स:** विशेष सवलत उपलब्ध\n• **AI मास्टरी कोर्स:** विशेष सवलत उपलब्ध\n\n💡 *मासिक हप्त्यांची (Installment) सोय उपलब्ध आहे!*`,
+          text: `💰 **निखिलेश भाटकर लर्निंग अकॅडमी - फी रचना:**\n\n• **इयत्ता ८ वी:** ₹८०० / महिना (१० महिने)\n• **इयत्ता ९ वी:** ₹९०० / महिना (१० महिने)\n• **इयत्ता १० वी (SSC):** ₹१,००० / महिना (१० महिने)\n• **इयत्ता १२ वी (HSC):** ₹७,००० / विषय (गणित / Physics / Chemistry)\n• **शेअर मार्केट कोर्स:** विशेष सवलत उपलब्ध\n• **AI मास्टरी कोर्स:** विशेष सवलत उपलब्ध\n\n💡 *मासिक हप्त्यांची (Installment) सोय उपलब्ध आहे!*`,
           chips: [
             { label: '🎯 मोफत २ दिवसांचा डेमो बुक करा', query: 'book demo' },
             { label: '⏰ बॅचच्या वेळा', query: 'timings' },
@@ -176,7 +176,7 @@
         };
       } else if (lang === 'hi') {
         return {
-          text: `💰 **निखिलेश भाटकर लर्निंग एकेडमी - शुल्क विवरण:**\n\n• **कक्षा ८वीं:** ₹८०० / महीना (१० महीने)\n• **कक्षा ९वीं:** ₹९०० / महीना (१० महीने)\n• **कक्षा १०वीं (SSC):** ₹१,००० / महीना (१० महीने)\n• **कक्षा १२वीं (HSC):** ₹५,००० / प्रति विषय (Maths / Physics / Chemistry)\n• **शेयर मार्केट कोर्स:** विशेष ऑफर उपलब्ध\n• **AI मास्टरी कोर्स:** विशेष ऑफर उपलब्ध\n\n💡 *आसान मासिक किस्तों की सुविधा उपलब्ध है!*`,
+          text: `💰 **निखिलेश भाटकर लर्निंग एकेडमी - शुल्क विवरण:**\n\n• **कक्षा ८वीं:** ₹८०० / महीना (१० महीने)\n• **कक्षा ९वीं:** ₹९०० / महीना (१० महीने)\n• **कक्षा १०वीं (SSC):** ₹१,००० / महीना (१० महीने)\n• **कक्षा १२वीं (HSC):** ₹७,००० / प्रति विषय (Maths / Physics / Chemistry)\n• **शेयर मार्केट कोर्स:** विशेष ऑफर उपलब्ध\n• **AI मास्टरी कोर्स:** विशेष ऑफर उपलब्ध\n\n💡 *आसान मासिक किस्तों की सुविधा उपलब्ध है!*`,
           chips: [
             { label: '🎯 डेमो क्लास बुक करें', query: 'book demo' },
             { label: '⏰ समय सारणी', query: 'timings' },
@@ -185,7 +185,7 @@
         };
       } else {
         return {
-          text: `💰 **Nikhillesh Bhatkar Learning Academy — Fee Structure:**\n\n• **Standard 8:** ₹800 / month (10 months)\n• **Standard 9:** ₹900 / month (10 months)\n• **Standard 10 (SSC):** ₹1,000 / month (10 months)\n• **Standard 12 (HSC):** ₹5,000 / subject (Maths, Physics, Chemistry)\n• **Stock Market Course:** Special batch discounts\n• **AI & GenAI Mastery:** Practical workshop package\n\n💡 *Flexible monthly installment options available!*`,
+          text: `💰 **Nikhillesh Bhatkar Learning Academy — Fee Structure:**\n\n• **Standard 8:** ₹800 / month (10 months)\n• **Standard 9:** ₹900 / month (10 months)\n• **Standard 10 (SSC):** ₹1,000 / month (10 months)\n• **Standard 12 (HSC):** ₹7,000 / subject (Maths, Physics, Chemistry)\n• **Stock Market Course:** Special batch discounts\n• **AI & GenAI Mastery:** Practical workshop package\n\n💡 *Flexible monthly installment options available!*`,
           chips: [
             { label: '🎯 Book Free Demo Class', query: 'book demo' },
             { label: '⏰ View Timetable', query: 'timings' },
