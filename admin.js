@@ -3215,16 +3215,42 @@ function setupEventListeners() {
   const resetPassHint = document.getElementById('resetAdminPassHint');
   if (resetPassBtn) {
     resetPassBtn.addEventListener('click', () => {
-      const defaultAdmin = JSON.parse(JSON.stringify(DEFAULT_ADMIN));
-      const current = AcademyDB.getAdmin();
-      const hint = `Current stored password: "${current.password}" → will become "${defaultAdmin.password}".`;
-      if (!confirm(`Reset the admin password back to the default?\n\n${hint}\n\nAll student, note, paper, inquiry, and other academy data will be left untouched.`)) {
+      // Generate a random 4‑digit OTP
+      const otp = Math.floor(1000 + Math.random() * 9000);
+      const expiresAt = Date.now() + 5 * 60 * 1000; // 5 min expiry
+      localStorage.setItem('demo_otp', JSON.stringify({ otp, expiresAt }));
+
+      // In a real setup you’d send the OTP via SMS. For demo, we show it.
+      alert(`✅ A 4‑digit verification code has been sent to your phone 8380096494. (Test code: ${otp})`);
+
+      const enteredOtp = prompt('Enter the 4‑digit verification code you received:');
+      if (!enteredOtp) {
+        alert('⚠️ OTP entry cancelled.');
         return;
       }
-      AcademyDB.saveAdmin(defaultAdmin);
+
+      const stored = JSON.parse(localStorage.getItem('demo_otp') || '{}');
+      if (Date.now() > stored.expiresAt || parseInt(enteredOtp, 10) !== stored.otp) {
+        alert('❌ Invalid or expired OTP.');
+        return;
+      }
+
+      // OTP valid – now reset password
+      const newPass = prompt('Enter a new password (at least 6 characters):');
+      if (!newPass || newPass.length < 6) {
+        alert('❌ Password must be at least 6 characters.');
+        return;
+      }
+      const confirmPass = prompt('Confirm new password:');
+      if (newPass !== confirmPass) {
+        alert('❌ Passwords do not match.');
+        return;
+      }
+      const adminRec = AcademyDB.getAdmin();
+      AcademyDB.saveAdmin({ ...adminRec, password: newPass });
       passForm.reset();
-      if (resetPassHint) resetPassHint.textContent = '✅ Admin password reset to default. All other data preserved.';
-      alert('✅ Admin password reset to default (admin / admin123). No academy data was changed.');
+      if (resetPassHint) resetPassHint.textContent = '✅ Admin password reset successfully. Please log in with the new credentials.';
+      alert('✅ Password reset successful. Use the new password to log in.');
     });
   }
 
