@@ -3210,6 +3210,24 @@ function setupEventListeners() {
     });
   }
 
+  // Reset Admin Password to Default (does NOT touch any academy data)
+  const resetPassBtn = document.getElementById('resetAdminPassBtn');
+  const resetPassHint = document.getElementById('resetAdminPassHint');
+  if (resetPassBtn) {
+    resetPassBtn.addEventListener('click', () => {
+      const defaultAdmin = JSON.parse(JSON.stringify(DEFAULT_ADMIN));
+      const current = AcademyDB.getAdmin();
+      const hint = `Current stored password: "${current.password}" → will become "${defaultAdmin.password}".`;
+      if (!confirm(`Reset the admin password back to the default?\n\n${hint}\n\nAll student, note, paper, inquiry, and other academy data will be left untouched.`)) {
+        return;
+      }
+      AcademyDB.saveAdmin(defaultAdmin);
+      passForm.reset();
+      if (resetPassHint) resetPassHint.textContent = '✅ Admin password reset to default. All other data preserved.';
+      alert('✅ Admin password reset to default (admin / admin123). No academy data was changed.');
+    });
+  }
+
   // Import & Export CSV Buttons
   const importCsvBtn = document.getElementById('importStudentsCsvBtn');
   const importCsvInput = document.getElementById('importStudentsCsvInput');

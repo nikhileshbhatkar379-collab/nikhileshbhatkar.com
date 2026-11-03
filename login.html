@@ -98,6 +98,8 @@
         </div>
 
         <button type="submit" class="btn-login-submit btn-admin-submit" data-i18n="login_btn_admin">Login to Dashboard →</button>
+        <button type="button" class="btn-link-forgot" id="adminForgotPassBtn" style="margin-top:10px;width:100%;background:transparent;border:1px dashed #c0392b;color:#c0392b;border-radius:6px;padding:8px;cursor:pointer;font-size:13px;">↺ Forgot / Reset Admin Password</button>
+        <p class="login-hint" id="adminPassHint" style="margin-top:8px;font-size:12px;color:#888;"></p>
       </form>
 
 
@@ -215,6 +217,25 @@
           loginAlert.style.display = 'block';
         }
       });
+
+      // Forgot / Reset Admin Password (client-side only — resets stored password to default)
+      const forgotBtn = document.getElementById('adminForgotPassBtn');
+      const passHint = document.getElementById('adminPassHint');
+      if (forgotBtn) {
+        forgotBtn.addEventListener('click', () => {
+          const current = AcademyDB.getAdmin();
+          const defaultAdmin = JSON.parse(JSON.stringify(DEFAULT_ADMIN));
+          const hint = `Current stored password: "${current.password}" → will become "${defaultAdmin.password}".`;
+          if (!confirm(`Reset the admin password back to the default?\n\n${hint}\n\nAll academy data (students, notes, papers, etc.) will be left untouched.`)) {
+            return;
+          }
+          AcademyDB.saveAdmin(defaultAdmin);
+          document.getElementById('adminPassword').value = '';
+          if (passHint) passHint.textContent = '✅ Admin password reset to default (admin / admin123).';
+          loginAlert.textContent = '✅ Password reset. Please log in with the default credentials.';
+          loginAlert.style.display = 'block';
+        });
+      }
     });
   </script>
 </body>
