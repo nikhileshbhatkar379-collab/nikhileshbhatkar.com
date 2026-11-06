@@ -56,6 +56,20 @@ function loadDB() {
     console.error('[server] Failed to load DB, using empty:', e.message);
     db = {};
   }
+
+  // A stale/empty DB (e.g. an old academy.json that parses to {}) must not
+  // silently stay empty — re-seed so the app is always functional.
+  if (!db.admin || !Array.isArray(db.students) || !Array.isArray(db.notices)) {
+    console.log('[server] Loaded DB is incomplete, re-seeding from auth.js');
+    try {
+      const { generateSeed } = require('./scripts/seed.js');
+      db = generateSeed();
+      saveDB();
+      console.log('[server] Re-seeded database');
+    } catch (seedErr) {
+      console.error('[server] Failed to re-seed DB:', seedErr.message);
+    }
+  }
 }
 
 function saveDB() {
