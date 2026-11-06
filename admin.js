@@ -24,10 +24,15 @@ function nextReceiptNo(receipts) {
 }
 
 function initAdminPortal() {
-  // 1. Enforce Authentication (allows both 'admin' and 'faculty')
-  const user = Auth.requireAuth('admin');
-  if (!user) return;
+  // 1. Enforce Authentication (allows both 'admin' and 'faculty') — async now,
+  //    so defer the rest of init until the session is verified.
+  Auth.requireAuth('admin').then(user => {
+    if (!user) return;
+    initAdminPortalWithUser(user);
+  });
+}
 
+function initAdminPortalWithUser(user) {
   // Faculty mode detection
   const isFaculty = user.role === 'faculty';
   window.isFacultyMode = isFaculty;
@@ -3183,17 +3188,12 @@ function setupEventListeners() {
   // Change Password Form
   const passForm = document.getElementById('changePasswordForm');
   if (passForm) {
-    passForm.addEventListener('submit', (e) => {
+    passForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const current = document.getElementById('currentAdminPass').value;
       const newPass = document.getElementById('newAdminPass').value;
       const confirmPass = document.getElementById('confirmAdminPass').value;
 
-      const admin = AcademyDB.getAdmin();
-      if (current !== admin.password) {
-        alert('❌ Current password does not match.');
-        return;
-      }
       if (newPass.length < 6) {
         alert('❌ New password must be at least 6 characters long.');
         return;
@@ -3203,10 +3203,23 @@ function setupEventListeners() {
         return;
       }
 
-      admin.password = newPass;
-      AcademyDB.saveAdmin(admin);
-      passForm.reset();
-      alert('✅ Admin password updated successfully!');
+      try {
+        const res = await fetch('/api/auth/change-password', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ currentPassword: current, newPassword: newPass, confirmPassword: confirmPass })
+        });
+        const data = await res.json();
+        if (data.success) {
+          passForm.reset();
+          alert('✅ Admin password updated successfully!');
+        } else {
+          alert('❌ ' + (data.message || 'Password update failed.'));
+        }
+      } catch (err) {
+        alert('❌ Could not reach the server. Password not updated.');
+      }
     });
   }
 
@@ -3347,11 +3360,24 @@ function setupEventListeners() {
     reader.readAsText(file);
   });
 
-  document.getElementById('resetDefaultDataBtn')?.addEventListener('click', () => {
+  document.getElementById('resetDefaultDataBtn')?.addEventListener('click', async () => {
     if (confirm('⚠️ WARNING: This will reset all students, notes, inquiries, tests, and attendance to initial demo state. Continue?')) {
-      AcademyDB.resetToDefaults();
-      loadAllAdminData();
-      alert('✅ Database reset to initial state.');
+      try {
+        const res = await fetch('/api/reset', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        if (res.ok) {
+          AcademyDB.resetToDefaults();
+          loadAllAdminData();
+          alert('✅ Database reset to initial state.');
+        } else {
+          alert('❌ Reset failed. Server responded with an error.');
+        }
+      } catch (err) {
+        alert('❌ Could not reach the server to reset the database.');
+      }
     }
   });
 }

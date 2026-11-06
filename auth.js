@@ -1855,74 +1855,140 @@ function initAcademyDB() {
 // Ensure DB is initialized
 initAcademyDB();
 
-// Database Accessors
+// Database Accessors — backed by the Node.js server (data/academy.json), with a
+// synchronous localStorage-seeded cache so renders never block on network I/O.
+// Falls back to the DEFAULT_* constants when the server is unreachable, so the
+// site keeps working offline exactly like before.
 const AcademyDB = {
-  getAdmin: () => JSON.parse(localStorage.getItem('academy_admin') || JSON.stringify(DEFAULT_ADMIN)),
-  saveAdmin: (admin) => localStorage.setItem('academy_admin', JSON.stringify(admin)),
+  _cache: {},
 
-  getStudents: () => {
-    try {
-      const stored = localStorage.getItem('academy_students');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch (e) {}
-    return DEFAULT_STUDENTS;
+  // Seed the cache from localStorage instantly (no network). Preserves each
+  // browser's existing data and falls back to the DEFAULT_* constants.
+  _seedFromStorage() {
+    const read = (k, fallback) => {
+      try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; }
+      catch (e) { return fallback; }
+    };
+    this._cache.admin = read('academy_admin', DEFAULT_ADMIN);
+    this._cache.students = read('academy_students', DEFAULT_STUDENTS);
+    this._cache.notes = read('academy_notes', DEFAULT_NOTES);
+    this._cache.papers = read('academy_papers', DEFAULT_PAPERS);
+    this._cache.notices = read('academy_notices', DEFAULT_NOTICES);
+    this._cache.inquiries = read('academy_inquiries', DEFAULT_INQUIRIES);
+    this._cache.tests = read('academy_tests', DEFAULT_TEST_RESULTS);
+    this._cache.attendance = read('academy_attendance', DEFAULT_ATTENDANCE);
+    this._cache.doubts = read('academy_doubts', DEFAULT_DOUBTS);
+    this._cache.receipts = read('academy_receipts', DEFAULT_RECEIPTS);
+    this._cache.timetable = read('academy_timetable', DEFAULT_TIMETABLE);
+    this._cache.toppers = read('academy_toppers', DEFAULT_TOPPERS);
+    this._cache.quizQuestions = DEFAULT_QUIZ_QUESTIONS;
+    this._cache.facultyAccounts = read('academy_faculty_accounts', []);
+    this._cache.whatsappLogs = [];
   },
-  saveStudents: (students) => localStorage.setItem('academy_students', JSON.stringify(students)),
 
-  getNotes: () => JSON.parse(localStorage.getItem('academy_notes') || '[]'),
-  saveNotes: (notes) => localStorage.setItem('academy_notes', JSON.stringify(notes)),
+  // Background refresh from the server. Safe to call multiple times.
+  _refresh() {
+    if (this._refreshing) return;
+    this._refreshing = true;
+    const cols = ['admin', 'facultyAccounts', 'students', 'notes', 'notices',
+      'inquiries', 'papers', 'tests', 'attendance', 'doubts', 'receipts',
+      'timetable', 'toppers', 'quizQuestions', 'whatsappLogs'];
+    (async () => {
+      for (const c of cols) {
+        try {
+          const res = await fetch('/api/' + c, { credentials: 'include' });
+          if (!res.ok) continue;
+          const fresh = await res.json();
+          // The server strips the admin password from every response, so preserve
+          // the locally-cached password rather than clobbering it with undefined.
+          if (c === 'admin' && this._cache.admin && this._cache.admin.password && !fresh.password) {
+            fresh.password = this._cache.admin.password;
+          }
+          this._cache[c] = fresh;
+        } catch (e) { /* server unreachable — keep cached/local data */ }
+      }
+      this._refreshing = false;
+      if (typeof window.dispatchEvent === 'function' && typeof Event === 'function') {
+        window.dispatchEvent(new Event('academy:data-refreshed'));
+      }
+    })();
+  },
 
-  getPapers: () => JSON.parse(localStorage.getItem('academy_papers') || JSON.stringify(DEFAULT_PAPERS)),
-  savePapers: (papers) => localStorage.setItem('academy_papers', JSON.stringify(papers)),
+  _get(collection, fallback) {
+    return (this._cache[collection] !== undefined) ? this._cache[collection] : fallback;
+  },
 
-  getNotices: () => JSON.parse(localStorage.getItem('academy_notices') || '[]'),
-  saveNotices: (notices) => localStorage.setItem('academy_notices', JSON.stringify(notices)),
+  _put(url, body) {
+    fetch(url, { method: 'PUT', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .catch(e => console.warn('Server save failed:', url, e));
+  },
 
-  getInquiries: () => JSON.parse(localStorage.getItem('academy_inquiries') || '[]'),
-  saveInquiries: (inquiries) => localStorage.setItem('academy_inquiries', JSON.stringify(inquiries)),
+  _post(url, body) {
+    fetch(url, { method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined })
+      .catch(e => console.warn('Server request failed:', url, e));
+  },
 
-  getTestResults: () => JSON.parse(localStorage.getItem('academy_tests') || JSON.stringify(DEFAULT_TEST_RESULTS)),
-  saveTestResults: (tests) => localStorage.setItem('academy_tests', JSON.stringify(tests)),
+  getAdmin: () => this._get('admin', DEFAULT_ADMIN),
+  saveAdmin: (admin) => { this._cache.admin = admin; this._put('/api/admin', admin); },
 
-  getAttendance: () => JSON.parse(localStorage.getItem('academy_attendance') || JSON.stringify(DEFAULT_ATTENDANCE)),
-  saveAttendance: (att) => localStorage.setItem('academy_attendance', JSON.stringify(att)),
+  getStudents: () => this._get('students', DEFAULT_STUDENTS),
+  saveStudents: (students) => { this._cache.students = students; this._put('/api/students', { items: students }); },
 
-  getDoubts: () => JSON.parse(localStorage.getItem('academy_doubts') || JSON.stringify(DEFAULT_DOUBTS)),
-  saveDoubts: (doubts) => localStorage.setItem('academy_doubts', JSON.stringify(doubts)),
+  getNotes: () => this._get('notes', DEFAULT_NOTES),
+  saveNotes: (notes) => { this._cache.notes = notes; this._put('/api/notes', { items: notes }); },
 
-  getReceipts: () => JSON.parse(localStorage.getItem('academy_receipts') || JSON.stringify(DEFAULT_RECEIPTS)),
-  saveReceipts: (receipts) => localStorage.setItem('academy_receipts', JSON.stringify(receipts)),
+  getPapers: () => this._get('papers', DEFAULT_PAPERS),
+  savePapers: (papers) => { this._cache.papers = papers; this._put('/api/papers', { items: papers }); },
 
-  getTimetable: () => JSON.parse(localStorage.getItem('academy_timetable') || JSON.stringify(DEFAULT_TIMETABLE)),
-  saveTimetable: (tt) => localStorage.setItem('academy_timetable', JSON.stringify(tt)),
+  getNotices: () => this._get('notices', DEFAULT_NOTICES),
+  saveNotices: (notices) => { this._cache.notices = notices; this._put('/api/notices', { items: notices }); },
 
-  getToppers: () => JSON.parse(localStorage.getItem('academy_toppers') || JSON.stringify(DEFAULT_TOPPERS)),
-  saveToppers: (toppers) => localStorage.setItem('academy_toppers', JSON.stringify(toppers)),
+  getInquiries: () => this._get('inquiries', DEFAULT_INQUIRIES),
+  saveInquiries: (inquiries) => { this._cache.inquiries = inquiries; this._put('/api/inquiries', { items: inquiries }); },
 
-  getQuizQuestions: () => DEFAULT_QUIZ_QUESTIONS,
+  getTestResults: () => this._get('tests', DEFAULT_TEST_RESULTS),
+  saveTestResults: (tests) => { this._cache.tests = tests; this._put('/api/tests', { items: tests }); },
+
+  getAttendance: () => this._get('attendance', DEFAULT_ATTENDANCE),
+  saveAttendance: (att) => { this._cache.attendance = att; this._put('/api/attendance', { items: att }); },
+
+  getDoubts: () => this._get('doubts', DEFAULT_DOUBTS),
+  saveDoubts: (doubts) => { this._cache.doubts = doubts; this._put('/api/doubts', { items: doubts }); },
+
+  getReceipts: () => this._get('receipts', DEFAULT_RECEIPTS),
+  saveReceipts: (receipts) => { this._cache.receipts = receipts; this._put('/api/receipts', { items: receipts }); },
+
+  getTimetable: () => this._get('timetable', DEFAULT_TIMETABLE),
+  saveTimetable: (tt) => { this._cache.timetable = tt; this._put('/api/timetable', { items: tt }); },
+
+  getToppers: () => this._get('toppers', DEFAULT_TOPPERS),
+  saveToppers: (toppers) => { this._cache.toppers = toppers; this._put('/api/toppers', { items: toppers }); },
+
+  getWhatsAppLogs: () => this._get('whatsappLogs', []),
+  saveWhatsAppLogs: (logs) => { this._cache.whatsappLogs = logs; this._put('/api/whatsappLogs', { items: logs }); },
+
+  getQuizQuestions: () => this._get('quizQuestions', DEFAULT_QUIZ_QUESTIONS),
+
+  getFacultyAccounts: () => this._get('facultyAccounts', []),
 
   resetToDefaults: () => {
-    localStorage.setItem('academy_admin', JSON.stringify(DEFAULT_ADMIN));
-    localStorage.setItem('academy_students', JSON.stringify(DEFAULT_STUDENTS));
-    localStorage.setItem('academy_notes', JSON.stringify(DEFAULT_NOTES));
-    localStorage.setItem('academy_papers', JSON.stringify(DEFAULT_PAPERS));
-    localStorage.setItem('academy_notices', JSON.stringify(DEFAULT_NOTICES));
-    localStorage.setItem('academy_inquiries', JSON.stringify(DEFAULT_INQUIRIES));
-    localStorage.setItem('academy_tests', JSON.stringify(DEFAULT_TEST_RESULTS));
-    localStorage.setItem('academy_attendance', JSON.stringify(DEFAULT_ATTENDANCE));
-    localStorage.setItem('academy_doubts', JSON.stringify(DEFAULT_DOUBTS));
-    localStorage.setItem('academy_receipts', JSON.stringify(DEFAULT_RECEIPTS));
-    localStorage.setItem('academy_timetable', JSON.stringify(DEFAULT_TIMETABLE));
-    localStorage.setItem('academy_toppers', JSON.stringify(DEFAULT_TOPPERS));
+    this._post('/api/reset');
+    // Clear cache so the next read re-seeds from localStorage / server
+    this._cache = {};
+    this._seedFromStorage();
   }
 };
 
-// Authentication Controller
+// Seed cache from localStorage immediately, then refresh from server in background
+AcademyDB._seedFromStorage();
+AcademyDB._refresh();
+
+// Authentication Controller — session is a server-side HttpOnly cookie
 const Auth = {
-  // Initialize faculty account in localStorage (runs once)
+  // Initialize faculty account in localStorage (runs once) — used as a
+  // fallback seed for browsers whose server is unreachable.
   _initFacultyAccount: () => {
     try {
       const existing = localStorage.getItem('academy_faculty_accounts');
@@ -1941,8 +2007,8 @@ const Auth = {
     } catch (e) {}
   },
 
-  // Admin Login
-  loginAdmin: (usernameOrEmail, password) => {
+  // Admin Login — async (server sets the session cookie)
+  loginAdmin: async (usernameOrEmail, password) => {
     Auth._initFacultyAccount(); // Ensure faculty accounts exist
 
     const primaryAdmin = AcademyDB.getAdmin();
@@ -1952,7 +2018,7 @@ const Auth = {
     // Accounts authorized for Admin / Faculty Dashboard
     const adminAccounts = [
       primaryAdmin,
-      ...(JSON.parse(localStorage.getItem('academy_faculty_accounts') || '[]'))
+      ...(AcademyDB.getFacultyAccounts() || [])
     ];
 
     const matchedAdmin = adminAccounts.find(a =>
@@ -1968,16 +2034,27 @@ const Auth = {
         username: matchedAdmin.username,
         loginTime: new Date().toISOString()
       };
-      const sessionStr = JSON.stringify(session);
-      try { localStorage.setItem('academy_session', sessionStr); } catch (e) {}
-      try { sessionStorage.setItem('academy_session', sessionStr); } catch (e) {}
+      Auth._currentUser = session;
+      // Try the server (sets HttpOnly cookie); fall back to localStorage
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usernameOrEmail, password, role: 'admin' })
+        });
+        const data = await res.json();
+        if (data.success) return { success: true, user: session };
+      } catch (e) {}
+      // Offline fallback
+      try { localStorage.setItem('academy_session', JSON.stringify(session)); } catch (e) {}
       return { success: true, user: session };
     }
     return { success: false, message: 'Invalid Admin username, email, or password.' };
   },
 
-  // Student Login
-  loginStudent: (studentIdOrPhone, pin) => {
+  // Student Login — async (server sets the session cookie)
+  loginStudent: async (studentIdOrPhone, pin) => {
     const students = AcademyDB.getStudents();
     const cleanId = (studentIdOrPhone || '').trim().toLowerCase();
     const cleanPin = (pin || '').trim();
@@ -2000,39 +2077,69 @@ const Auth = {
         feeStatus: student.feeStatus,
         loginTime: new Date().toISOString()
       };
-      const sessionStr = JSON.stringify(session);
-      try { localStorage.setItem('academy_session', sessionStr); } catch (e) {}
-      try { sessionStorage.setItem('academy_session', sessionStr); } catch (e) {}
+      // Try the server (sets HttpOnly cookie); fall back to localStorage
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studentIdOrPhone, pin, role: 'student' })
+        });
+        const data = await res.json();
+        if (data.success) return { success: true, user: session };
+      } catch (e) {}
+      // Offline fallback
+      try { localStorage.setItem('academy_session', JSON.stringify(session)); } catch (e) {}
       return { success: true, user: session };
     }
     return { success: false, message: 'Invalid Student ID / Phone or PIN password.' };
   },
 
-  // Get current logged-in session
-  getCurrentUser: () => {
+  // Cached session — set synchronously by login() so guards and render code
+  // can call getCurrentUser() without awaiting. Refreshed from the server in
+  // the background; falls back to localStorage when the server is unreachable.
+  _currentUser: null,
+
+  // Get current logged-in session — synchronous, returns the cached user.
+  getCurrentUser: () => Auth._currentUser,
+
+  // Async: verify the session against the server and update the cache.
+  // Safe to call anywhere; no-ops if the server is unreachable.
+  refreshCurrentUser: async () => {
+    try {
+      const res = await fetch('/api/auth/me', { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          Auth._currentUser = data.user;
+          return data.user;
+        }
+      }
+    } catch (e) {}
+    // Fall back to localStorage
     let raw = null;
     try { raw = localStorage.getItem('academy_session'); } catch (e) {}
     if (!raw) {
       try { raw = sessionStorage.getItem('academy_session'); } catch (e) {}
     }
-    if (!raw) return null;
-    try {
-      return JSON.parse(raw);
-    } catch {
-      return null;
+    if (raw) {
+      try { Auth._currentUser = JSON.parse(raw); } catch (e) {}
     }
+    return Auth._currentUser;
   },
 
-  // Logout current session
-  logout: () => {
+  // Logout current session — clears the server cookie and redirects
+  logout: async () => {
+    try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch (e) {}
     try { localStorage.removeItem('academy_session'); } catch (e) {}
     try { sessionStorage.removeItem('academy_session'); } catch (e) {}
     window.location.href = 'login.html';
   },
 
-  // Guard for protected pages (admin.html, student.html)
-  requireAuth: (requiredRole) => {
-    const user = Auth.getCurrentUser();
+  // Guard for protected pages (admin.html, student.html) — async because it
+  // verifies the session against the server before proceeding.
+  requireAuth: async (requiredRole) => {
+    const user = await Auth.refreshCurrentUser();
     if (!user) {
       window.location.href = 'login.html';
       return null;
@@ -2054,6 +2161,21 @@ const Auth = {
 if (typeof window !== 'undefined') {
   window.Auth = Auth;
   window.AcademyDB = AcademyDB;
+
+  // Seed the session cache from localStorage so synchronous getCurrentUser() calls
+  // (e.g. notes.html render) keep working across page loads, then refresh from the
+  // server in the background.
+  (function seedSession() {
+    let raw = null;
+    try { raw = localStorage.getItem('academy_session'); } catch (e) {}
+    if (!raw) {
+      try { raw = sessionStorage.getItem('academy_session'); } catch (e) {}
+    }
+    if (raw) {
+      try { Auth._currentUser = JSON.parse(raw); } catch (e) {}
+    }
+    Auth.refreshCurrentUser();
+  })();
 }
 
 // Global Document Download & File Generation Utility

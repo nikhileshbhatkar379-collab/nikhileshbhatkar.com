@@ -2,9 +2,9 @@
 // Nikhillesh Bhatkar Learning Academy — Student Portal Controller
 // ------------------------------------------------------------------
 
-document.addEventListener('DOMContentLoaded', () => {
-  // 1. Enforce Student Authentication
-  const user = Auth.requireAuth('student');
+document.addEventListener('DOMContentLoaded', async () => {
+  // 1. Enforce Student Authentication — async now (verifies session vs server)
+  const user = await Auth.requireAuth('student');
   if (!user) return;
 
   // Set Student Profile Details

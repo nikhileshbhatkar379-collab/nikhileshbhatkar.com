@@ -1,0 +1,14 @@
+{
+  "name": "nikhileshbhatkar-learning-academy",
+  "version": "1.0.0",
+  "description": "Nikhillesh Bhatkar Learning Academy website — static front-end + zero-dependency Node.js server",
+  "private": true,
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node scripts/seed.js"
+  }
+}

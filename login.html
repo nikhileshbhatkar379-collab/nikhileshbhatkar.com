@@ -185,14 +185,14 @@
       });
 
       // Student Form Submit
-      studentForm.addEventListener('submit', (e) => {
+      studentForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         loginAlert.style.display = 'none';
 
         const id = document.getElementById('studentId').value;
         const pin = document.getElementById('studentPin').value;
 
-        const result = Auth.loginStudent(id, pin);
+        const result = await Auth.loginStudent(id, pin);
         if (result.success) {
           window.location.href = 'student.html';
         } else {
@@ -202,14 +202,14 @@
       });
 
       // Admin Form Submit
-      adminForm.addEventListener('submit', (e) => {
+      adminForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         loginAlert.style.display = 'none';
 
         const username = document.getElementById('adminUsername').value;
         const password = document.getElementById('adminPassword').value;
 
-        const result = Auth.loginAdmin(username, password);
+        const result = await Auth.loginAdmin(username, password);
         if (result.success) {
           window.location.href = 'admin.html';
         } else {
@@ -254,8 +254,22 @@
             alert('❌ Passwords do not match.');
             return;
           }
-          const adminRec = AcademyDB.getAdmin();
-          AcademyDB.saveAdmin({ ...adminRec, password: newPass });
+          try {
+            const res = await fetch('/api/auth/reset-admin-password', {
+              method: 'POST',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ newPassword: newPass, confirmPassword: confirmPass })
+            });
+            const data = await res.json();
+            if (!data.success) {
+              alert('❌ ' + (data.message || 'Password reset failed.'));
+              return;
+            }
+          } catch (e) {
+            alert('❌ Could not reach the server to reset the password.');
+            return;
+          }
           document.getElementById('adminPassword').value = '';
           if (passHint) passHint.textContent = '✅ Admin password reset successfully. Please log in with the new credentials.';
           alert('✅ Password reset successful. Use the new password to log in.');
