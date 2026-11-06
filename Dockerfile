@@ -15,6 +15,10 @@ COPY *.html ./
 COPY images/ ./images/
 COPY *.png *.jpg *.jpeg ./
 
+# Cache-bust: bumping this comment forces Fly to rebuild the image when the
+# server.js fix needs to go live (deploy otherwise reuses the cached image).
+# Last rebuild: 2026-11-06
+
 # Fly.io mounts the persistent volume at /data, so point the server there
 ENV DATA_DIR=/data
 
