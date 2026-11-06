@@ -8,6 +8,9 @@ WORKDIR /app
 # Copy only what the server needs first (dependency-free, so this layer is cached)
 COPY server.js scripts/seed.js package.json ./
 COPY data/ ./data/
+# seed.js reads auth.js from disk to extract the DEFAULT_* data, so it must be
+# in the image too — without it the container's re-seed fails silently.
+COPY auth.js ./
 
 # Copy static site files
 COPY auth.js admin.js student.js script.js chatbot.js i18n.js style.css ./
