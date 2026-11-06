@@ -57,10 +57,16 @@ function loadDB() {
     db = {};
   }
 
-  // A stale/empty DB (e.g. an old academy.json that parses to {}) must not
-  // silently stay empty — re-seed so the app is always functional.
-  if (!db.admin || !Array.isArray(db.students) || !Array.isArray(db.notices)) {
-    console.log('[server] Loaded DB is incomplete, re-seeding from auth.js');
+  // A stale/empty DB (e.g. an old academy.json that parses to {} or has empty
+  // collections) must not silently stay empty — re-seed so the app is always
+  // functional. Check that the key collections actually have content, not just
+  // that the keys exist (an empty array still "looks" complete).
+  const needsSeed = !db.admin ||
+    !Array.isArray(db.students) || db.students.length === 0 ||
+    !Array.isArray(db.notices) || db.notices.length === 0 ||
+    !Array.isArray(db.toppers) || db.toppers.length === 0;
+  if (needsSeed) {
+    console.log('[server] Loaded DB is incomplete or empty, re-seeding from auth.js');
     try {
       const { generateSeed } = require('./scripts/seed.js');
       db = generateSeed();
