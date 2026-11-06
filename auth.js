@@ -1899,10 +1899,16 @@ const AcademyDB = {
           const res = await fetch('/api/' + c, { credentials: 'include' });
           if (!res.ok) continue;
           const fresh = await res.json();
-          // The server strips the admin password from every response, so preserve
-          // the locally-cached password rather than clobbering it with undefined.
+          // The server strips the admin password and student PINs from every
+          // response, so preserve the locally-cached secrets rather than
+          // clobbering them with undefined (otherwise login matching breaks).
           if (c === 'admin' && this._cache.admin && this._cache.admin.password && !fresh.password) {
             fresh.password = this._cache.admin.password;
+          }
+          if (c === 'students' && Array.isArray(this._cache.students) && Array.isArray(fresh)) {
+            const pinMap = {};
+            this._cache.students.forEach(s => { if (s && s.id && s.pin) pinMap[s.id] = s.pin; });
+            fresh.forEach(s => { if (s && s.id && pinMap[s.id] && !s.pin) s.pin = pinMap[s.id]; });
           }
           this._cache[c] = fresh;
         } catch (e) { /* server unreachable — keep cached/local data */ }
@@ -2055,10 +2061,40 @@ const Auth = {
 
   // Student Login — async (server sets the session cookie)
   loginStudent: async (studentIdOrPhone, pin) => {
-    const students = AcademyDB.getStudents();
     const cleanId = (studentIdOrPhone || '').trim().toLowerCase();
     const cleanPin = (pin || '').trim();
 
+    // The server keeps the PIN (needed to verify it) but strips it from every
+    // GET response, so the locally-cached students may have lost their pin
+    // after a background refresh. Ask the server first; only fall back to the
+    // local cache when the server is unreachable.
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentIdOrPhone, pin, role: 'student' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        const session = {
+          role: 'student',
+          id: data.user.id,
+          name: data.user.name,
+          phone: data.user.phone,
+          standard: data.user.standard,
+          subjects: data.user.subjects,
+          feeStatus: data.user.feeStatus,
+          loginTime: new Date().toISOString()
+        };
+        Auth._currentUser = session;
+        return { success: true, user: session };
+      }
+      return { success: false, message: data.message || 'Invalid Student ID / Phone or PIN.' };
+    } catch (e) {}
+
+    // Offline fallback — match against the local cache
+    const students = AcademyDB.getStudents();
     const student = students.find(s => {
       const idMatch = (s.id || '').trim().toLowerCase() === cleanId;
       const phoneMatch = (s.phone || '').trim().toLowerCase() === cleanId;
@@ -2077,19 +2113,8 @@ const Auth = {
         feeStatus: student.feeStatus,
         loginTime: new Date().toISOString()
       };
-      // Try the server (sets HttpOnly cookie); fall back to localStorage
-      try {
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ studentIdOrPhone, pin, role: 'student' })
-        });
-        const data = await res.json();
-        if (data.success) return { success: true, user: session };
-      } catch (e) {}
-      // Offline fallback
       try { localStorage.setItem('academy_session', JSON.stringify(session)); } catch (e) {}
+      Auth._currentUser = session;
       return { success: true, user: session };
     }
     return { success: false, message: 'Invalid Student ID / Phone or PIN password.' };
