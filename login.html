@@ -31,7 +31,7 @@
       <nav role="navigation" aria-label="Main navigation">
         <ul>
           <li><a href="index.html#about" data-i18n="nav_about">About</a></li>
-          <li><a href="index.html#vision-mission" data-i18n="nav_vision">Vision &amp; Mission</a></li>
+          <li><a href="index.html#vision-mission" data-i18n="nav_vision">Vision & Mission</a></li>
           <li><a href="index.html#grades" data-i18n="nav_courses">Courses</a></li>
           <li><a href="index.html#special-courses" data-i18n="nav_special_courses">Special Courses</a></li>
           <li><a href="index.html#syllabus" data-i18n="nav_syllabus">Syllabus</a></li>
@@ -218,20 +218,20 @@
         }
       });
 
-      // Forgot / Reset Admin Password (client‑side simulation)
+      // Forgot / Reset Admin Password (client-side simulation)
       const forgotBtn = document.getElementById('adminForgotPassBtn');
       const passHint = document.getElementById('adminPassHint');
       if (forgotBtn) {
-        forgotBtn.addEventListener('click', () => {
-          // Generate a random 4‑digit OTP
+        forgotBtn.addEventListener('click', async () => {
+          // Generate a random 4-digit OTP
           const otp = Math.floor(1000 + Math.random() * 9000);
-          const expiresAt = Date.now() + 5 * 60 * 1000; // 5 min expiry
+          const expiresAt = Date.now() + 5 * 60 * 1000; // 5 min expiry
           localStorage.setItem('demo_otp', JSON.stringify({ otp, expiresAt }));
 
-          // In a real setup you’d send the OTP via SMS. For demo, we show it.
-          alert(`✅ A 4‑digit verification code has been sent to your phone 8380096494. (Test code: ${otp})`);
+          // In a real setup you'd send the OTP via SMS. For demo, we show it.
+          alert('✅ A 4-digit verification code has been sent to your phone 8380096494. (Test code: ' + otp + ')');
 
-          const enteredOtp = prompt('Enter the 4‑digit verification code you received:');
+          const enteredOtp = prompt('Enter the 4-digit verification code you received:');
           if (!enteredOtp) {
             alert('⚠️ OTP entry cancelled.' );
             return;
