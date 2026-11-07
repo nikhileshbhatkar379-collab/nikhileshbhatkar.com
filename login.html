@@ -59,10 +59,10 @@
         <button class="role-tab active" id="tabStudent" role="tab" aria-selected="true" aria-controls="studentLoginForm" data-i18n="login_tab_student">
           🎓 Student Portal
         </button>
-        <button class="role-tab" id="tabFaculty" role="tab" aria-selected="false" aria-controls="adminLoginForm" data-i18n="login_tab_faculty">
+        <button class="role-tab" id="tabFaculty" role="tab" aria-selected="false" aria-controls="staffLoginForm" data-i18n="login_tab_faculty">
           👨‍🏫 Faculty Panel
         </button>
-        <button class="role-tab" id="tabAdmin" role="tab" aria-selected="false" aria-controls="adminLoginForm" data-i18n="login_tab_admin">
+        <button class="role-tab" id="tabAdmin" role="tab" aria-selected="false" aria-controls="staffLoginForm" data-i18n="login_tab_admin">
           ⚙️ Admin Dashboard
         </button>
       </div>
@@ -85,21 +85,21 @@
         <button type="submit" class="btn-login-submit" data-i18n="login_btn_student">Login to Student Portal →</button>
       </form>
 
-      <!-- Admin Login Form -->
-      <form id="adminLoginForm" class="login-form" role="tabpanel" aria-labelledby="tabAdmin" style="display:none;">
+      <!-- Admin / Faculty Login Form -->
+      <form id="staffLoginForm" class="login-form" role="tabpanel" aria-labelledby="tabAdmin" style="display:none;">
         <div class="form-group">
-          <label for="adminUsername" data-i18n="login_lbl_admuser">Username or Email</label>
-          <input type="text" id="adminUsername" name="admin_username" placeholder="Enter your username or email" required autocomplete="username">
+          <label for="staffUsername" data-i18n="login_lbl_admuser">Username or Email</label>
+          <input type="text" id="staffUsername" name="staff_username" placeholder="Enter your username or email" required autocomplete="username">
         </div>
 
         <div class="form-group">
-          <label for="adminPassword" data-i18n="login_lbl_admpass">Password</label>
-          <input type="password" id="adminPassword" name="admin_password" placeholder="Enter password" required autocomplete="current-password">
+          <label for="staffPassword" data-i18n="login_lbl_admpass">Password</label>
+          <input type="password" id="staffPassword" name="staff_password" placeholder="Enter password" required autocomplete="current-password">
         </div>
 
         <button type="submit" class="btn-login-submit btn-admin-submit" data-i18n="login_btn_admin">Login to Dashboard →</button>
-        <button type="button" class="btn-link-forgot" id="adminForgotPassBtn" style="margin-top:10px;width:100%;background:transparent;border:1px dashed #c0392b;color:#c0392b;border-radius:6px;padding:8px;cursor:pointer;font-size:13px;">↺ Forgot / Reset Admin Password</button>
-        <p class="login-hint" id="adminPassHint" style="margin-top:8px;font-size:12px;color:#888;"></p>
+        <button type="button" class="btn-link-forgot" id="staffForgotPassBtn" style="margin-top:10px;width:100%;background:transparent;border:1px dashed #c0392b;color:#c0392b;border-radius:6px;padding:8px;cursor:pointer;font-size:13px;">↺ Forgot / Reset Password</button>
+        <p class="login-hint" id="staffPassHint" style="margin-top:8px;font-size:12px;color:#888;"></p>
       </form>
 
 
@@ -129,7 +129,7 @@
       const tabFaculty = document.getElementById('tabFaculty');
       const tabAdmin = document.getElementById('tabAdmin');
       const studentForm = document.getElementById('studentLoginForm');
-      const adminForm = document.getElementById('adminLoginForm');
+      const staffForm = document.getElementById('staffLoginForm');
       const loginAlert = document.getElementById('loginAlert');
 
       function switchTab(role) {
@@ -143,7 +143,7 @@
           tabAdmin.setAttribute('aria-selected', 'false');
 
           studentForm.style.display = 'block';
-          adminForm.style.display = 'none';
+          staffForm.style.display = 'none';
         } else if (role === 'faculty') {
           tabFaculty.classList.add('active');
           tabFaculty.setAttribute('aria-selected', 'true');
@@ -152,7 +152,7 @@
           tabAdmin.classList.remove('active');
           tabAdmin.setAttribute('aria-selected', 'false');
 
-          adminForm.style.display = 'block';
+          staffForm.style.display = 'block';
           studentForm.style.display = 'none';
         } else {
           tabAdmin.classList.add('active');
@@ -162,7 +162,7 @@
           tabFaculty.classList.remove('active');
           tabFaculty.setAttribute('aria-selected', 'false');
 
-          adminForm.style.display = 'block';
+          staffForm.style.display = 'block';
           studentForm.style.display = 'none';
         }
       }
@@ -201,13 +201,13 @@
         }
       });
 
-      // Admin Form Submit
-      adminForm.addEventListener('submit', async (e) => {
+      // Staff (Admin/Faculty) Form Submit
+      staffForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         loginAlert.style.display = 'none';
 
-        const username = document.getElementById('adminUsername').value;
-        const password = document.getElementById('adminPassword').value;
+        const username = document.getElementById('staffUsername').value;
+        const password = document.getElementById('staffPassword').value;
 
         const result = await Auth.loginAdmin(username, password);
         if (result.success) {
@@ -218,9 +218,9 @@
         }
       });
 
-      // Forgot / Reset Admin Password (client-side simulation)
-      const forgotBtn = document.getElementById('adminForgotPassBtn');
-      const passHint = document.getElementById('adminPassHint');
+      // Forgot / Reset Staff Password (client-side simulation)
+      const forgotBtn = document.getElementById('staffForgotPassBtn');
+      const passHint = document.getElementById('staffPassHint');
       if (forgotBtn) {
         forgotBtn.addEventListener('click', async () => {
           // Generate a random 4-digit OTP
@@ -270,8 +270,8 @@
             alert('❌ Could not reach the server to reset the password.');
             return;
           }
-          document.getElementById('adminPassword').value = '';
-          if (passHint) passHint.textContent = '✅ Admin password reset successfully. Please log in with the new credentials.';
+          document.getElementById('staffPassword').value = '';
+          if (passHint) passHint.textContent = '✅ Password reset successfully. Please log in with the new credentials.';
           alert('✅ Password reset successful. Use the new password to log in.');
         });
       }
