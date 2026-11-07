@@ -213,6 +213,9 @@ const TRANSLATIONS = {
     'login_lbl_admuser': 'Admin Username or Email',
     'login_lbl_admpass': 'Admin Password',
     'login_btn_admin': 'Login to Admin Dashboard →',
+    'login_lbl_facuser': 'Faculty Username or Email',
+    'login_lbl_facpass': 'Faculty Password',
+    'login_btn_faculty': 'Login to Faculty Panel →',
     'login_demo_title': '⚡ Quick Demo Credentials (Click to Auto-fill)',
 
     // Common
@@ -429,6 +432,9 @@ const TRANSLATIONS = {
     'login_lbl_admuser': 'ॲडमिन युझरनेम किंवा ईमेल',
     'login_lbl_admpass': 'ॲडमिन पासवर्ड',
     'login_btn_admin': 'ॲडमिन डॅशबोर्डमध्ये लॉगिन करा →',
+    'login_lbl_facuser': 'फॅकल्टी युजरनेम किंवा ईमेल',
+    'login_lbl_facpass': 'फॅकल्टी पासवर्ड',
+    'login_btn_faculty': 'फॅकल्टी पॅनलमध्ये लॉगिन करा →',
     'login_demo_title': '⚡ झटपट डेमो क्रेडेंशियल्स (ऑटो-फिलसाठी क्लिक करा)',
 
     // Common
@@ -645,6 +651,9 @@ const TRANSLATIONS = {
     'login_lbl_admuser': 'एडमिन यूजरनेम या ईमेल',
     'login_lbl_admpass': 'एडमिन पासवर्ड',
     'login_btn_admin': 'एडमिन डैशबोर्ड में लॉगिन करें →',
+    'login_lbl_facuser': 'फैकल्टी यूजरनेम या ईमेल',
+    'login_lbl_facpass': 'फैकल्टी पासवर्ड',
+    'login_btn_faculty': 'फैकल्टी पैनल में लॉगिन करें →',
     'login_demo_title': '⚡ त्वरित डेमो क्रेडेंशियल्स (ऑटो-फिल के लिए क्लिक करें)',
 
     // Common
@@ -722,3 +731,8 @@ const I18n = {
 document.addEventListener('DOMContentLoaded', () => {
   I18n.init();
 });
+
+// Expose I18n globally so other scripts (e.g., login.html) can access it
+if (typeof window !== 'undefined') {
+  window.I18n = I18n;
+}

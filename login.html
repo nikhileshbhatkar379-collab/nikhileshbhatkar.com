@@ -97,7 +97,7 @@
           <input type="password" id="staffPassword" name="staff_password" placeholder="Enter password" required autocomplete="current-password">
         </div>
 
-        <button type="submit" class="btn-login-submit btn-admin-submit" data-i18n="login_btn_admin">Login to Dashboard →</button>
+        <button type="submit" class="btn-login-submit btn-admin-submit" id="staffSubmit" data-i18n="login_btn_admin">Login to Dashboard →</button>
         <button type="button" class="btn-link-forgot" id="staffForgotPassBtn" style="margin-top:10px;width:100%;background:transparent;border:1px dashed #c0392b;color:#c0392b;border-radius:6px;padding:8px;cursor:pointer;font-size:13px;">↺ Forgot / Reset Password</button>
         <p class="login-hint" id="staffPassHint" style="margin-top:8px;font-size:12px;color:#888;"></p>
       </form>
@@ -164,6 +164,35 @@
 
           staffForm.style.display = 'block';
           studentForm.style.display = 'none';
+        }
+        // Show the right labels for the active staff form
+        applyStaffLabels(role === 'faculty');
+      }
+
+      function applyStaffLabels(isFaculty) {
+        const set = (labelFor, key) => {
+          const el = document.querySelector('label[for="' + labelFor + '"]');
+          if (!el) return;
+          el.setAttribute('data-i18n', key);
+          // Re-run i18n translation for this element
+          if (window.I18n && typeof window.I18n.setLanguage === 'function') {
+            const lang = window.I18n.getCurrentLang();
+            window.I18n.setLanguage(lang);
+          }
+        };
+        const userKey = isFaculty ? 'login_lbl_facuser' : 'login_lbl_admuser';
+        const passKey = isFaculty ? 'login_lbl_facpass' : 'login_lbl_admpass';
+        const btnKey = isFaculty ? 'login_btn_faculty' : 'login_btn_admin';
+        set('staffUsername', userKey);
+        set('staffPassword', passKey);
+        // Submit button
+        const btn = document.getElementById('staffSubmit');
+        if (btn) {
+          btn.setAttribute('data-i18n', btnKey);
+          if (window.I18n && typeof window.I18n.setLanguage === 'function') {
+            const lang = window.I18n.getCurrentLang();
+            window.I18n.setLanguage(lang);
+          }
         }
       }
 
