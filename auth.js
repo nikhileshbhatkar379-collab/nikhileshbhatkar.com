@@ -1937,43 +1937,46 @@ const AcademyDB = {
   },
 
   getAdmin: () => AcademyDB._get('admin', DEFAULT_ADMIN),
-  saveAdmin: (admin) => { AcademyDB._cache.admin = admin; AcademyDB._put('/api/admin', admin); },
+  // Helper: persist to localStorage so data survives logout/login
+  _persist: (key, data) => { try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {} },
+
+  saveAdmin: (admin) => { AcademyDB._cache.admin = admin; AcademyDB._put('/api/admin', admin); AcademyDB._persist('academy_admin', admin); },
 
   getStudents: () => AcademyDB._get('students', DEFAULT_STUDENTS),
-  saveStudents: (students) => { AcademyDB._cache.students = students; AcademyDB._put('/api/students', { items: students }); },
+  saveStudents: (students) => { AcademyDB._cache.students = students; AcademyDB._put('/api/students', { items: students }); AcademyDB._persist('academy_students', students); },
 
   getNotes: () => AcademyDB._get('notes', DEFAULT_NOTES),
-  saveNotes: (notes) => { AcademyDB._cache.notes = notes; AcademyDB._put('/api/notes', { items: notes }); },
+  saveNotes: (notes) => { AcademyDB._cache.notes = notes; AcademyDB._put('/api/notes', { items: notes }); AcademyDB._persist('academy_notes', notes); },
 
   getPapers: () => AcademyDB._get('papers', DEFAULT_PAPERS),
-  savePapers: (papers) => { AcademyDB._cache.papers = papers; AcademyDB._put('/api/papers', { items: papers }); },
+  savePapers: (papers) => { AcademyDB._cache.papers = papers; AcademyDB._put('/api/papers', { items: papers }); AcademyDB._persist('academy_papers', papers); },
 
   getNotices: () => AcademyDB._get('notices', DEFAULT_NOTICES),
-  saveNotices: (notices) => { AcademyDB._cache.notices = notices; AcademyDB._put('/api/notices', { items: notices }); },
+  saveNotices: (notices) => { AcademyDB._cache.notices = notices; AcademyDB._put('/api/notices', { items: notices }); AcademyDB._persist('academy_notices', notices); },
 
   getInquiries: () => AcademyDB._get('inquiries', DEFAULT_INQUIRIES),
-  saveInquiries: (inquiries) => { AcademyDB._cache.inquiries = inquiries; AcademyDB._put('/api/inquiries', { items: inquiries }); },
+  saveInquiries: (inquiries) => { AcademyDB._cache.inquiries = inquiries; AcademyDB._put('/api/inquiries', { items: inquiries }); AcademyDB._persist('academy_inquiries', inquiries); },
 
   getTestResults: () => AcademyDB._get('tests', DEFAULT_TEST_RESULTS),
-  saveTestResults: (tests) => { AcademyDB._cache.tests = tests; AcademyDB._put('/api/tests', { items: tests }); },
+  saveTestResults: (tests) => { AcademyDB._cache.tests = tests; AcademyDB._put('/api/tests', { items: tests }); AcademyDB._persist('academy_tests', tests); },
 
   getAttendance: () => AcademyDB._get('attendance', DEFAULT_ATTENDANCE),
-  saveAttendance: (att) => { AcademyDB._cache.attendance = att; AcademyDB._put('/api/attendance', { items: att }); },
+  saveAttendance: (att) => { AcademyDB._cache.attendance = att; AcademyDB._put('/api/attendance', { items: att }); AcademyDB._persist('academy_attendance', att); },
 
   getDoubts: () => AcademyDB._get('doubts', DEFAULT_DOUBTS),
-  saveDoubts: (doubts) => { AcademyDB._cache.doubts = doubts; AcademyDB._put('/api/doubts', { items: doubts }); },
+  saveDoubts: (doubts) => { AcademyDB._cache.doubts = doubts; AcademyDB._put('/api/doubts', { items: doubts }); AcademyDB._persist('academy_doubts', doubts); },
 
   getReceipts: () => AcademyDB._get('receipts', DEFAULT_RECEIPTS),
-  saveReceipts: (receipts) => { AcademyDB._cache.receipts = receipts; AcademyDB._put('/api/receipts', { items: receipts }); },
+  saveReceipts: (receipts) => { AcademyDB._cache.receipts = receipts; AcademyDB._put('/api/receipts', { items: receipts }); AcademyDB._persist('academy_receipts', receipts); },
 
   getTimetable: () => AcademyDB._get('timetable', DEFAULT_TIMETABLE),
-  saveTimetable: (tt) => { AcademyDB._cache.timetable = tt; AcademyDB._put('/api/timetable', { items: tt }); },
+  saveTimetable: (tt) => { AcademyDB._cache.timetable = tt; AcademyDB._put('/api/timetable', { items: tt }); AcademyDB._persist('academy_timetable', tt); },
 
   getToppers: () => AcademyDB._get('toppers', DEFAULT_TOPPERS),
-  saveToppers: (toppers) => { AcademyDB._cache.toppers = toppers; AcademyDB._put('/api/toppers', { items: toppers }); },
+  saveToppers: (toppers) => { AcademyDB._cache.toppers = toppers; AcademyDB._put('/api/toppers', { items: toppers }); AcademyDB._persist('academy_toppers', toppers); },
 
   getWhatsAppLogs: () => AcademyDB._get('whatsappLogs', []),
-  saveWhatsAppLogs: (logs) => { AcademyDB._cache.whatsappLogs = logs; AcademyDB._put('/api/whatsappLogs', { items: logs }); },
+  saveWhatsAppLogs: (logs) => { AcademyDB._cache.whatsappLogs = logs; AcademyDB._put('/api/whatsappLogs', { items: logs }); AcademyDB._persist('academy_whatsappLogs', logs); },
 
   getQuizQuestions: () => AcademyDB._get('quizQuestions', DEFAULT_QUIZ_QUESTIONS),
 
